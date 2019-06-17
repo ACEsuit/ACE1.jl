@@ -7,6 +7,7 @@
 
 module SHIPs
 
+include("auxiliary.jl") 
 include("prototypes.jl")
 include("jacobi.jl")
 include("sphericalharmonics.jl")
