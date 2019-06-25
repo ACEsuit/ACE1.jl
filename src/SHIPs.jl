@@ -7,6 +7,9 @@
 
 module SHIPs
 
+using Reexport
+@reexport using JuLIP 
+
 include("auxiliary.jl")
 include("prototypes.jl")
 include("jacobi.jl")
