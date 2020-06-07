@@ -57,16 +57,18 @@ include("utils/importv5.jl")
 
 include("compat/compat.jl")
 
+
+include("grapheval.jl")
+
+
+
+
 # - bond model
 # - pure basis
 # - real basis
 # - regularisers
 # - descriptors
 # - random potentials
-
-
-include("treeeval.jl")
-
 
 
 end # module
