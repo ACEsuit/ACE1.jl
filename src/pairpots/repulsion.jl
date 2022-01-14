@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -32,16 +32,13 @@ evaluate_d(V::BuckPot, r::Number) = V.B * exp( - V.A * (r/V.ri-1) ) * V.ri * (
                             - V.A / V.ri / r  - 1/r^2  )
 
 write_dict(V::BuckPot) = Dict(
-         "__id__" => "ACE_BuckPot",
+         "__id__" => "ACE1_BuckPot",
              "e0" => V.e0,
               "A" => V.A,
              "ri" => V.ri,
               "B" => V.B   )
 
-read_dict(::Val{:SHIPs_BuckPot}, D::Dict) =
-   read_dict(Val{:ACE_BuckPot}(), D)
-
-read_dict(::Val{:ACE_BuckPot}, D::Dict) =
+read_dict(::Val{:ACE1_BuckPot}, D::Dict) =
       BuckPot(D["e0"], D["A"], D["ri"], D["B"])
 
 ==(V1::BuckPot, V2::BuckPot) = _allfieldsequal(V1, V2)
@@ -157,11 +154,11 @@ end
 #  File IO
 
 write_dict(V::RepulsiveCore) = Dict(
-      "__id__" => "ACE_RepulsiveCore",
+      "__id__" => "ACE1_RepulsiveCore",
         "Vout" => write_dict(V.Vout),
          "Vin" => write_dict.(V.Vin[:]) )
 
-function read_dict(::Val{:ACE_RepulsiveCore}, D::Dict)
+function read_dict(::Val{:ACE1_RepulsiveCore}, D::Dict)
    Vout = read_dict(D["Vout"])
    nz = numz(Vout)
    Vin = read_dict.(D["Vin"])

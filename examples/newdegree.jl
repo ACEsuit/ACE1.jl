@@ -1,16 +1,16 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
 # A demonstration how to use the new SparsePSHDegreeM degree type
-# see also ?ACE.RPI.SparsePSHDegreeM
+# see also ?ACE1.RPI.SparsePSHDegreeM
 
-using ACE, JuLIP
-using ACE: z2i, i2z, order
+using ACE1, JuLIP
+using ACE1: z2i, i2z, order
 #---
 
 zTi = AtomicNumber(:Ti)
@@ -36,14 +36,14 @@ Dd = Dict( "default" => 10,
            (2, zTi) => 25   # an extra push for the 3-body Ti basis
         )                   # (probably a dumb idea, just for illustration!)
 
-Deg = ACE.RPI.SparsePSHDegreeM(Dn, Dl, Dd)
+Deg = ACE1.RPI.SparsePSHDegreeM(Dn, Dl, Dd)
 
 #---
 
 # generate basis
 # - note that degree is already incorporated into Deg
 #   but we can still enlarge it e.g. by using maxdeg = 1.2, 1.5, 2.0, ...
-basis = ACE.Utils.rpi_basis(species = [:Ti, :Al],
+basis = ACE1.Utils.rpi_basis(species = [:Ti, :Al],
                               N = 5,
                               r0 = rnn(:Ti),
                               D = Deg,
@@ -81,7 +81,7 @@ println("The Ti-Ti interaction has more basis functions than Ti-Al interaction")
 # spec = [specAl; specTi]
 # I_ord2 = findall( order.(spec) .== 1 )
 #
-# ACE.degree.(Ref(Deg), spec[I_ord2])
+# ACE1.degree.(Ref(Deg), spec[I_ord2])
 #
 # spec2 = spec[I_ord2]
 # ns_spec2 = [ b.oneps[1].n for b in spec2 ]

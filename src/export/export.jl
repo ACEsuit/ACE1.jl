@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -9,13 +9,13 @@
 
 module Export
 
-import ACE, JuLIP
-using ACE.RPI: BasicPSH1pBasis, PSH1pBasisFcn
-using ACE: PIBasis, PIBasisFcn, PIPotential
-using ACE.OrthPolys: TransformedPolys
-using ACE: rand_radial, cutoff, numz
+import ACE1, JuLIP
+using ACE1.RPI: BasicPSH1pBasis, PSH1pBasisFcn
+using ACE1: PIBasis, PIBasisFcn, PIPotential
+using ACE1.OrthPolys: TransformedPolys
+using ACE1: rand_radial, cutoff, numz
 using JuLIP: energy, bulk, i2z, z2i, chemical_symbol
-using ACE.PairPotentials: RepulsiveCore, PolyPairPot
+using ACE1.PairPotentials: RepulsiveCore, PolyPairPot
 
 function export_ace(fname::AbstractString, args...;  kwargs...)
    fptr = open(fname; write=true)
@@ -44,9 +44,9 @@ function export_ace(fptr::IOStream, Pr::TransformedPolys; ntests=0, kwargs...)
    # save some tests
    println(fptr, "tests: ntests=$(ntests)")
    for itest = 1:ntests
-      r = ACE.rand_radial(Pr)
-      P = ACE.evaluate(Pr, r)
-      dP = ACE.evaluate_d(Pr, r)
+      r = ACE1.rand_radial(Pr)
+      P = ACE1.evaluate(Pr, r)
+      dP = ACE1.evaluate_d(Pr, r)
       println(fptr, " r=$(r)")
       for n = 1:length(P)
          println(fptr, " $(P[n]) $(dP[n])")
@@ -109,7 +109,7 @@ function export_ace(fptr::IOStream, V::PIPotential, Vpair=nothing, V0=nothing; k
    end
 
    println(fptr, "")
-   println(fptr, "radbasename=ACE.jl.Basic")
+   println(fptr, "radbasename=ACE1.jl.Basic")
    println(fptr, "haspair: $(haspair)")
    println(fptr, "")
 

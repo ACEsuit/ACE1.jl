@@ -1,13 +1,13 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
 using Test
-import ACE, JuLIP
+import ACE1, JuLIP
 import InteractiveUtils
 
 
@@ -51,7 +51,7 @@ for (N, degs) in degrees, maxdeg in degs, rcut in rcuts
                         "rcut" => rcut, "wL" => 1.3 ) )
 end
 D = Dict("paramsets" => params,
-               "at" => write_dict(ACE.Random.rand_config(:Si; repeat=3)))
+               "at" => write_dict(ACE1.Random.rand_config(:Si; repeat=3)))
 
 
 # generate and save the basis sets if they don't  exist yet
@@ -60,8 +60,8 @@ D["results"] = []
 D["labels"] = []
 D["versioninfo"] = Dict{String, Any}()
 @showprogress for params in D["paramsets"]
-   basis = ACE.Testing.test_basis(params)
-   coeffs = ACE.Random.randcoeffs(basis; diff=2)
+   basis = ACE1.Testing.test_basis(params)
+   coeffs = ACE1.Random.randcoeffs(basis; diff=2)
    push!(D["results"], Dict("basis" => write_dict(basis), "coeffs" => coeffs))
 end
 JuLIP.save_dict(testfile, D)

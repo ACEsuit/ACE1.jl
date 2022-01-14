@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -32,13 +32,10 @@ end
 Base.show(io::IO, b::PSH1pBasisFcn) = print(io, "znlm[$(b.z.z)|$(b.n),$(b.l),$(b.m)]")
 
 write_dict(b::PSH1pBasisFcn) =
-   Dict("__id__" => "ACE_PSH1pBasisFcn",
+   Dict("__id__" => "ACE1_PSH1pBasisFcn",
         "nlmz" => [ b.n, b.l, b.m, Int(b.z) ] )
 
-read_dict(::Val{:SHIPs_PSH1pBasisFcn}, D::Dict) =
-   read_dict(Val{:ACE_PSH1pBasisFcn}(), D)
-
-read_dict(::Val{:ACE_PSH1pBasisFcn}, D::Dict) =
+read_dict(::Val{:ACE1_PSH1pBasisFcn}, D::Dict) =
    PSH1pBasisFcn(D["nlmz"]...)
 
 scaling(b::PSH1pBasisFcn, p) = b.n^p + b.l^p + abs(b.m)^p

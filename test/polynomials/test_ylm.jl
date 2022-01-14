@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -9,11 +9,11 @@
 @testset "Ylm" begin
 
 ##
-import ACE
+import ACE1
 using JuLIP.Testing
 using LinearAlgebra, StaticArrays, BenchmarkTools, Test, Printf
-using ACE.SphericalHarmonics
-using ACE.SphericalHarmonics: dspher_to_dcart, PseudoSpherical,
+using ACE1.SphericalHarmonics
+using ACE1.SphericalHarmonics: dspher_to_dcart, PseudoSpherical,
                cart2spher, spher2cart
 using JuLIP: evaluate, evaluate_d, evaluate_ed
 
@@ -80,12 +80,12 @@ verbose=false
 for nsamples = 1:30
    θ = 0.1+0.4 * pi * rand()
    L = 5
-   P = ACE.SphericalHarmonics.compute_p(L, θ)
-   P1, dP = ACE.SphericalHarmonics.compute_dp(L, θ)
+   P = ACE1.SphericalHarmonics.compute_p(L, θ)
+   P1, dP = ACE1.SphericalHarmonics.compute_dp(L, θ)
    # -------------
    P_eq_P1 = true
    for l = 0:L, m = 0:l
-      i = ACE.SphericalHarmonics.index_p(l, m)
+      i = ACE1.SphericalHarmonics.index_p(l, m)
       if ((m == 0) && !(P[i] ≈ P1[i])) || ((m > 0) && !(P[i] ≈ P1[i] * sin(θ)))
          P_eq_P1 = false; break;
       end
@@ -96,7 +96,7 @@ for nsamples = 1:30
    verbose && @printf("     h    | error \n")
    for p = 2:10
       h = 0.1^p
-      dPh = (ACE.SphericalHarmonics.compute_p(L, θ+h) - P) / h
+      dPh = (ACE1.SphericalHarmonics.compute_p(L, θ+h) - P) / h
       push!(errs, norm(dP - dPh, Inf))
       verbose && @printf(" %.2e | %.2e \n", h, errs[end])
    end
@@ -111,13 +111,13 @@ println()
 for nsamples = 1:30
    θ = rand() * 1e-8
    L = 5
-   P = ACE.SphericalHarmonics.compute_p(L, θ)
-   _, dP = ACE.SphericalHarmonics.compute_dp(L, θ)
+   P = ACE1.SphericalHarmonics.compute_p(L, θ)
+   _, dP = ACE1.SphericalHarmonics.compute_dp(L, θ)
    errs = []
    verbose && @printf("     h    | error \n")
    for p = 2:10
       h = 0.1^p
-      dPh = (ACE.SphericalHarmonics.compute_p(L, θ+h) - P) / h
+      dPh = (ACE1.SphericalHarmonics.compute_p(L, θ+h) - P) / h
       push!(errs, norm(dP - dPh, Inf))
       verbose && @printf(" %.2e | %.2e \n", h, errs[end])
    end

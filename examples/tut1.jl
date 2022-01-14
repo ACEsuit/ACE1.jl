@@ -1,12 +1,12 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
-using JuLIP, ACE, JuLIP.Potentials, LinearAlgebra
-using ACE.Testing: lsq, get_V0
+using JuLIP, ACE1, JuLIP.Potentials, LinearAlgebra
+using ACE1.Testing: lsq, get_V0
 using LinearAlgebra: qr, cond
 using Plots
 
@@ -17,7 +17,7 @@ end
 
 function get_basis(species; N = 3, maxdeg = 10, rcut = 7.0 )
    rcut = 7.0
-   basis = ACE.Utils.rpi_basis(; species=species, N = N, r0 = 2.5,
+   basis = ACE1.Utils.rpi_basis(; species=species, N = N, r0 = 2.5,
    maxdeg = maxdeg, rcut = rcut,
    rin = rnn(:W) * 0.6,
    constants = false )

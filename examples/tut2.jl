@@ -1,12 +1,12 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
-using JuLIP, ACE, JuLIP.Potentials, LinearAlgebra
-using ACE.Testing: lsq, get_V0
+using JuLIP, ACE1, JuLIP.Potentials, LinearAlgebra
+using ACE1.Testing: lsq, get_V0
 using LinearAlgebra: qr, cond
 using JuLIP: Atoms
 using Plots

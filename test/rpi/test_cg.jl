@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -12,10 +12,10 @@
 
 #---
 
-using PyCall, Test, ACE, ACE.SphericalHarmonics, JuLIP.Testing, StaticArrays
+using PyCall, Test, ACE1, ACE1.SphericalHarmonics, JuLIP.Testing, StaticArrays
 using JuLIP: evaluate
-using ACE.SphericalHarmonics: index_y
-using ACE.RPI.Rotations3D: ClebschGordan
+using ACE1.SphericalHarmonics: index_y
+using ACE1.RPI.Rotations3D: ClebschGordan
 
 #---
 

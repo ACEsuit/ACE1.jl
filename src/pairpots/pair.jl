@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -17,7 +17,7 @@ using JuLIP.Potentials: ZList, SZList, @pot, @D,
                         PairPotential, SimplePairPotential
 using StaticArrays: SMatrix
 
-using ACE: ScalarBasis, _allfieldsequal
+using ACE1: ScalarBasis, _allfieldsequal
 
 import JuLIP: evaluate!, evaluate_d!, cutoff,
               evaluate, evaluate_d,
@@ -29,7 +29,7 @@ import JuLIP: evaluate!, evaluate_d!, cutoff,
 
 import JuLIP.Potentials: zlist               
 
-import ACE: scaling
+import ACE1: scaling
 
 import JuLIP.MLIPs: alloc_B, alloc_dB
 

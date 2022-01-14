@@ -1,12 +1,12 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
-using ACE, Pkg
+using ACE1, Pkg
 using Pkg.Artifacts
 
 artifacts_toml = joinpath(pathof(ACE)[1:end-11], "Artifacts.toml")
@@ -34,7 +34,7 @@ end
 #---
 # testing the artifacts
 
-using ACE, Pkg, JuLIP
+using ACE1, Pkg, JuLIP
 using Pkg.Artifacts
 
 #---

@@ -3,10 +3,10 @@
 
 #---
 
-using ACE
+using ACE1
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing, Random
 using JuLIP: evaluate, evaluate_d, evaluate_ed
-using ACE: combine
+using ACE1: combine
 using BenchmarkTools
 
 #---
@@ -18,9 +18,9 @@ r0 = 1.0
 rcut = 3.0
 trans = PolyTransform(1, r0)
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
-D = ACE.SparsePSHDegree()
-P1 = ACE.BasicPSH1pBasis(Pr; species = species)
-basis = ACE.PIBasis(P1, N, D, maxdeg)
+D = ACE1.SparsePSHDegree()
+P1 = ACE1.BasicPSH1pBasis(Pr; species = species)
+basis = ACE1.PIBasis(P1, N, D, maxdeg)
 
 #---
 
@@ -37,14 +37,14 @@ end
 
 Vdag = combine(basis, csp)
 V = standardevaluator(Vdag)
-Vdag_sp = ACE.deletezeros(Vdag)
+Vdag_sp = ACE1.deletezeros(Vdag)
 V_sp = standardevaluator(Vdag_sp)
 # Vdag_sp = graphevaluator(V_sp)
 
 #---
 
 Nat = 3
-Rs, Zs, z0 = ACE.rand_nhd(Nat, Pr, species)
+Rs, Zs, z0 = ACE1.rand_nhd(Nat, Pr, species)
 
 # evaluate_d(Vdag_sp, Rs, Zs, z0)
 
@@ -62,9 +62,9 @@ end
 
 for (pot, name) in ( (V, "V"), (Vdag, "Vdag"),
                    (V_sp, "V_sp"), (Vdag_sp, "Vdag_sp") )
-   tmp = ACE.alloc_temp(pot, Nat)
+   tmp = ACE1.alloc_temp(pot, Nat)
    @info("Energy Timing for $name")
-   @btime ACE.evaluate!($tmp, $pot, $Rs, $Zs, $z0)
+   @btime ACE1.evaluate!($tmp, $pot, $Rs, $Zs, $z0)
 end
 
 #---
@@ -73,7 +73,7 @@ graphevaluator(Vdag_sp)
 
 for (pot, name) in ( (V, "V"), (Vdag, "Vdag"),
                    (V_sp, "V_sp"), (Vdag_sp, "Vdag_sp") )
-   tmpd = ACE.alloc_temp_d(pot, Nat)
+   tmpd = ACE1.alloc_temp_d(pot, Nat)
    @info("Force Timing for $name")
-   @btime ACE.evaluate_d!($(tmpd.dV), $tmpd, $pot, $Rs, $Zs, $z0)
+   @btime ACE1.evaluate_d!($(tmpd.dV), $tmpd, $pot, $Rs, $Zs, $z0)
 end

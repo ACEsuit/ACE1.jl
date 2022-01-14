@@ -1,10 +1,10 @@
 module ExportMulti
 
 using YAML
-using ACE
-using ACE: PIBasis, PIBasisFcn, PIPotential
-using ACE.OrthPolys: TransformedPolys
-using ACE: rand_radial, cutoff, numz, ZList
+using ACE1
+using ACE1: PIBasis, PIBasisFcn, PIPotential
+using ACE1.OrthPolys: TransformedPolys
+using ACE1: rand_radial, cutoff, numz, ZList
 using JuLIP: energy, bulk, i2z, z2i, chemical_symbol
 
 function export_ACE(fname, IP)
@@ -139,7 +139,7 @@ function export_radial_basis(V3, species_dict)
     maxn = length(V3.pibasis.basis1p.J.J.A)
 
     #guessing "radbasname" is that just "polypairpots"
-    radbasename = "ACE.jl.base"
+    radbasename = "ACE1.jl.base"
 
     embeddings = Dict()
 

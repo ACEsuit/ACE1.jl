@@ -1,13 +1,13 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 export get_orders, get_nl
 
-import ACE: standardevaluator, graphevaluator
+import ACE1: standardevaluator, graphevaluator
 using SparseArrays: SparseMatrixCSC, sparse
 using LinearAlgebra: mul!
 
@@ -99,7 +99,7 @@ end
 ==(B1::RPIBasis, B2::RPIBasis) = (B1.pibasis == B2.pibasis)
 
 write_dict(basis::RPIBasis) = Dict(
-      "__id__" => "ACE_RPIBasis",
+      "__id__" => "ACE1_RPIBasis",
       "__v__"  => "v0_8_2",
       "pibasis" => write_dict(basis.pibasis),
       "A2Bmaps" => write_dict.(basis.A2Bmaps),
@@ -108,7 +108,7 @@ write_dict(basis::RPIBasis) = Dict(
 
 
 # v0.8.2 onwards
-function read_dict(::Val{:ACE_RPIBasis}, ::Val{:v0_8_2}, D::Dict)
+function read_dict(::Val{:ACE1_RPIBasis}, ::Val{:v0_8_2}, D::Dict)
    pibasis = read_dict(D["pibasis"])
    A2Bmaps = tuple( read_dict.(D["A2Bmaps"])... )
    Bz0inds = tuple( [ ur[1]:ur[2] for ur in D["Bz0inds"] ]... )
@@ -116,11 +116,8 @@ function read_dict(::Val{:ACE_RPIBasis}, ::Val{:v0_8_2}, D::Dict)
 end
 
 # old version
-read_dict(::Val{:ACE_RPIBasis}, D::Dict) =
+read_dict(::Val{:ACE1_RPIBasis}, D::Dict) =
    RPIBasis(read_dict(D["pibasis"]))
-
-read_dict(::Val{:SHIPs_RPIBasis}, D::Dict) =
-   read_dict(Val{:ACE_RPIBasis}(), D)
 
 
 # ------------------------------------------------------------------------
@@ -197,7 +194,7 @@ function _rpi_A2B_matrix(rotc::Rot3DCoeffs,
             # permutation-invariant basis functions. This means we will
             # add the same PI basis function several times, but in the call to
             # `sparse` the values will just be added.
-            bcol_ordered = ACE._get_ordered(pibasis, bcol)
+            bcol_ordered = ACE1._get_ordered(pibasis, bcol)
             idxAA = pibasis.inner[iz0].b2iAA[bcol_ordered]
             push!(Irow, idxB)
             push!(Jcol, idxAA)

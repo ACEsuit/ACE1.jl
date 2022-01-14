@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -16,8 +16,8 @@ import JuLIP: evaluate!, evaluate_d!, JVec, cutoff, fltype
 import JuLIP.FIO: read_dict, write_dict
 import JuLIP.MLIPs: alloc_B, alloc_dB, IPBasis
 
-import ACE
-using ACE.Transforms: DistanceTransform, transform, transform_d,
+import ACE1
+using ACE1.Transforms: DistanceTransform, transform, transform_d,
                         inv_transform, MultiTransform
 
 import Base: ==
@@ -46,7 +46,7 @@ function _fcut_d_(pl, tl, pr, tr, t)
 end
 
 
-struct OrthPolyBasis{T} <: ACE.ScalarBasis{T}
+struct OrthPolyBasis{T} <: ACE1.ScalarBasis{T}
    # ----------------- the parameters for the cutoff function
    pl::Int        # cutoff power left
    tl::T          # cutoff left (transformed variable)
@@ -70,7 +70,7 @@ Base.length(P::OrthPolyBasis) = length(P.A)
            for sym in (:pr, :tr, :pl, :tl, :A, :B, :C) )
 
 write_dict(J::OrthPolyBasis{T}) where {T} = Dict(
-      "__id__" => "ACE_OrthPolyBasis",
+      "__id__" => "ACE1_OrthPolyBasis",
       "T" => write_dict(T),
       "pr" => J.pr,
       "tr" => J.tr,
@@ -88,15 +88,12 @@ OrthPolyBasis(D::Dict, T=read_dict(D["T"])) =
       T[], T[]
    )
 
-read_dict(::Val{:SHIPs_OrthPolyBasis}, D::Dict) =
-   read_dict(Val{:ACE_OrthPolyBasis}(), D::Dict)
-
-read_dict(::Val{:ACE_OrthPolyBasis}, D::Dict) = OrthPolyBasis(D)
+read_dict(::Val{:ACE1_OrthPolyBasis}, D::Dict) = OrthPolyBasis(D)
 
 # rand applied to a J will return a random transformed distance drawn from
 # the measure w.r.t. which the polynomials were constructed.
 # TODO: allow non-constant weights!
-function ACE.rand_radial(J::OrthPolyBasis)
+function ACE1.rand_radial(J::OrthPolyBasis)
    @assert maximum(abs, diff(J.ww)) == 0
    return rand(J.tdf)
 end
@@ -231,7 +228,7 @@ end
 # ----------------------------------------------------------------
 
 
-struct TransformedPolys{T, TT, TJ} <: ACE.ScalarBasis{T}
+struct TransformedPolys{T, TT, TJ} <: ACE1.ScalarBasis{T}
    J::TJ          # the actual basis
    trans::TT      # coordinate transform
    rl::T          # lower bound r
@@ -248,7 +245,7 @@ TransformedPolys(J, trans, rl, ru) =
    TransformedPolys(J, trans, rl, ru)
 
 write_dict(J::TransformedPolys) = Dict(
-      "__id__" => "ACE_TransformedPolys",
+      "__id__" => "ACE1_TransformedPolys",
       "J" => write_dict(J.J),
       "rl" => J.rl,
       "ru" => J.ru,
@@ -263,16 +260,13 @@ TransformedPolys(D::Dict) =
       D["ru"]
    )
 
-read_dict(::Val{:SHIPs_TransformedPolys}, D::Dict) =
-   read_dict(Val{:ACE_TransformedPolys}(), D)
-
-read_dict(::Val{:ACE_TransformedPolys}, D::Dict) = TransformedPolys(D)
+read_dict(::Val{:ACE1_TransformedPolys}, D::Dict) = TransformedPolys(D)
 
 Base.length(J::TransformedPolys) = length(J.J)
 fltype(P::TransformedPolys{T}) where {T} = T
 
-function ACE.rand_radial(J::TransformedPolys)
-   t = ACE.rand_radial(J.J)
+function ACE1.rand_radial(J::TransformedPolys)
+   t = ACE1.rand_radial(J.J)
    return inv_transform(J.trans, t)
 end
 
@@ -336,11 +330,11 @@ function transformed_jacobi(maxdeg::Integer,
                            kwargs...)
    # this construction can only work if the transforms are then 
    # sent to a single unified domain. 
-   @assert eltype(trans.transforms) <: ACE.Transforms.AffineT
+   @assert eltype(trans.transforms) <: ACE1.Transforms.AffineT
    @assert all( (t.y1 == -1) && (t.y2 == 1) 
                  for t in trans.transforms )
    # obtain the maximum outer cutoff and minimum inner cutoff 
-   rin, rcut = ACE.Transforms.cutoff_extrema(trans)
+   rin, rcut = ACE1.Transforms.cutoff_extrema(trans)
    # now construct the orthogonal polynomials with the [-1,1] domain. 
    J =  discrete_jacobi(maxdeg; tcut = 1.0, tin = -1.0, 
                                 pcut = pcut, kwargs...)

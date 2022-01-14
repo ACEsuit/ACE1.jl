@@ -1,19 +1,19 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
 
-using JuLIP, ACE, JuLIP.Potentials, LinearAlgebra
+using JuLIP, ACE1, JuLIP.Potentials, LinearAlgebra
 using JuLIP.Potentials: SZList, ZList
-using ACE.Testing: ToyModel, trainset, lsq
+using ACE1.Testing: ToyModel, trainset, lsq
 
 function get_basis(species; N = 3, maxdeg = 10, rcut = 7.0 )
    rcut = 7.0
-   basis = ACE.Utils.rpi_basis(; species=species, N = N, r0 = 2.5,
+   basis = ACE1.Utils.rpi_basis(; species=species, N = N, r0 = 2.5,
    maxdeg = maxdeg, rcut = rcut,
    rin = rnn(:Fe) * 0.6,
    constants = false )
@@ -37,7 +37,7 @@ end
 #---
 
 species = [:Fe, :Al]
-at = ACE.Testing.rand_config(ToyModel(species))
+at = ACE1.Testing.rand_config(ToyModel(species))
 
 basis = get_basis(species; N = 3, maxdeg = 6, rcut = 6.0)
 c = rand(length(basis)) .- 0.5

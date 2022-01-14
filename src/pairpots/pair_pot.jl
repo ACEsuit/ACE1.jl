@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -33,16 +33,13 @@ numz(V::PolyPairPot) = numz(V.basis)
             ( (V1.basis == V2.basis) && (V1.coeffs == V2.coeffs) )
 
 write_dict(V::PolyPairPot{T}) where {T} = Dict(
-      "__id__" => "ACE_PolyPairPot",
+      "__id__" => "ACE1_PolyPairPot",
       "T" => write_dict(T),
       "coeffs" => V.coeffs,
       "basis" => write_dict(V.basis)
       )
 
-read_dict(::Val{:SHIPs_PolyPairPot}, D::Dict) =
-   read_dict(Val{:ACE_PolyPairPot}(), D)
-
-read_dict(::Val{:ACE_PolyPairPot}, D::Dict, T = read_dict(D["T"])) =
+read_dict(::Val{:ACE1_PolyPairPot}, D::Dict, T = read_dict(D["T"])) =
       PolyPairPot(read_dict(D["basis"]), T.(D["coeffs"]))
 
 

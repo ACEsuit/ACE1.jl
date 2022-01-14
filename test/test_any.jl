@@ -2,7 +2,7 @@
 
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -13,14 +13,14 @@
 #---
 
 
-using ACE, JuLIP, Test
-using ACE: combine
+using ACE1, JuLIP, Test
+using ACE1: combine
 
 #---
 
 @info("Testing :Any Potential to evaluate energy, forces, virial")
-basis = ACE.Utils.rpi_basis(species = :Any, N = 3, r0 = 2.7, rcut = 5.0, maxdeg = 8)
-c = ACE.Random.randcoeffs(basis)
+basis = ACE1.Utils.rpi_basis(species = :Any, N = 3, r0 = 2.7, rcut = 5.0, maxdeg = 8)
+c = ACE1.Random.randcoeffs(basis)
 V = combine(basis, c)
 
 #---
@@ -36,7 +36,7 @@ end
 #---
 
 @info(" ... check that a non-Any potential will fail this test")
-basis1 = ACE.Utils.rpi_basis(species = :Fe, N = 3, r0 = 2.7, rcut = 5.0, maxdeg = 8)
+basis1 = ACE1.Utils.rpi_basis(species = :Fe, N = 3, r0 = 2.7, rcut = 5.0, maxdeg = 8)
 V1 = combine(basis1, c)   # same coefficients
 
 println(@test energy(V1, at1) ≈ energy(V, at1))

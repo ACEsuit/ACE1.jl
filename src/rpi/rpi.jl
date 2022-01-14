@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -14,14 +14,14 @@ include("../extimports.jl")
 include("../aceimports.jl")
 
 
-import ACE.SphericalHarmonics: SHBasis, index_y
+import ACE1.SphericalHarmonics: SHBasis, index_y
 
 export RPIBasis, SparsePSHDegree, BasicPSH1pBasis,
        diagonal_regulariser
 
 # specify the `Rotations3D` submodule for CLebsch-Gordan and related
 include("rotations3d.jl")
-using ACE.RPI.Rotations3D
+using ACE1.RPI.Rotations3D
 
 # some basic degree types useful for RPI type constructions
 # (this file also specifies the PSH1pBasisFcn

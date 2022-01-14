@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -12,7 +12,7 @@ module Random
 # TODO: rename rand_radial -> rand???
 
 import LinearAlgebra: norm
-import ACE: ScalarBasis, ZList, rand_radial, scaling
+import ACE1: ScalarBasis, ZList, rand_radial, scaling
 
 using Random: shuffle
 using JuLIP: JVecF, AbstractCalculator, rnn, chemical_symbol, bulk, rattle!,
@@ -105,7 +105,7 @@ randcombine(basis; diff = 2) =
    combine(basis, randcoeffs(basis; diff = diff))
 
 # # move to utility???
-# function rand(::Type{ACE.RPI.RPIBasis}; kwargs...)
+# function rand(::Type{ACE1.RPI.RPIBasis}; kwargs...)
 #
 # end
 

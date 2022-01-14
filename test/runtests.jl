@@ -1,16 +1,16 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
-using ACE, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
+using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
       JuLIP, JuLIP.Testing
 
 ##
-@testset "ACE.jl" begin
+@testset "ACE1.jl" begin
     # ------------------------------------------
     #   basic polynomial basis building blocks
     include("polynomials/test_ylm.jl")
@@ -26,7 +26,7 @@ using ACE, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
 
     # ------------------------
     #   rotation_invariance
-    # TODO: implement check whehter Sympy is available
+    # TODO: implement a check whether Sympy is available and run test conditionally 
     # include("rpi/test_cg.jl")
     include("rpi/test_rpibasis.jl")
 
@@ -38,19 +38,9 @@ using ACE, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
 
     # ----------------------
     #   miscallaneous ...
-    include("compat/test_compat_v05.jl")
-
-    # These tests are current failing !!!
+    # TODO: These tests are current failing - should be re-examined and fixed 
     # include("compat/test_compat.jl")
 
     include("test_any.jl")
     include("polynomials/test_multitrans.jl")
-    # ----------------------------------
-    #    old tests to be re-introduced
-    # include("test_real.jl")
-    # include("test_orth.jl")
-    # include("test_descriptor.jl")
-    # include("bonds/test_cylindrical.jl")
-    # include("bonds/test_fourier.jl")
-    # include("bonds/test_envpairbasis.jl")
 end
