@@ -1,7 +1,7 @@
 # ACE.jl
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ACEsuit.github.io/ACEdocs.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://ACEsuit.github.io/ACEdocs.jl/dev)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ACEsuit.github.io/ACE1docs.jl/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://ACEsuit.github.io/ACE1docs.jl/dev)
 
 <!-- [![Build Status](https://travis-ci.com/JuliaMolSim/ACE.jl.svg?branch=master)](https://travis-ci.com/JuliaMolSim/ACE.jl)
 
