@@ -1,4 +1,4 @@
-# ACE.jl
+# ACE1.jl
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ACEsuit.github.io/ACE1docs.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://ACEsuit.github.io/ACE1docs.jl/dev)
@@ -21,11 +21,11 @@ When using this software, please cite the following references
 
 ## License
 
-`ACE.jl` is © 2019, Christoph Ortner
+`ACE1.jl` is © 2019, Christoph Ortner
 
-`ACE.jl` is published and distributed under the [Academic Software License v1.0 (ASL).](ASL.md)
+`ACE1.jl` is published and distributed under the [Academic Software License v1.0 (ASL).](ASL.md)
 
-`ACE.jl` is distributed in the hope that it will be useful for non-commercial academic research, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the ASL for more details.
+`ACE1.jl` is distributed in the hope that it will be useful for non-commercial academic research, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the ASL for more details.
 
 You should have received a copy of the ASL along with this program; if not, write to Christoph Ortner, christophortner0@gmail.com. It is also published at [https://github.com/gabor1/ASL/blob/main/ASL.md](https://github.com/gabor1/ASL/blob/main/ASL.md).
 
