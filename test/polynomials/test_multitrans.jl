@@ -1,7 +1,7 @@
-using ACE, Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
-using ACE.Testing 
+using ACE1, Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
+using ACE1.Testing 
 using JuLIP: evaluate, evaluate_d
-using ACE.Transforms: multitransform, transform, transform_d
+using ACE1.Transforms: multitransform, transform, transform_d
 
 ##
 

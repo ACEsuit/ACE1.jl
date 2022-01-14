@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -8,7 +8,7 @@
 
 
 
-import ACE.DAG: CorrEvalGraph, get_eval_graph, traverse_fwd!
+import ACE1.DAG: CorrEvalGraph, get_eval_graph, traverse_fwd!
 
 export PIBasis
 
@@ -50,14 +50,11 @@ function PIBasisFcn(Aspec, t, z0::AtomicNumber)
 end
 
 write_dict(b::PIBasisFcn) =
-   Dict("__id__" => "ACE_PIBasisFcn",
+   Dict("__id__" => "ACE1_PIBasisFcn",
         "z0" => write_dict(b.z0),
         "oneps" => write_dict.(b.oneps))
 
-read_dict(::Val{:SHIPs_PIBasisFcn}, D::Dict) =
-   read_dict(Val{:ACE_PIBasisFcn}(), D::Dict)
-
-read_dict(::Val{:ACE_PIBasisFcn}, D::Dict) =
+read_dict(::Val{:ACE1_PIBasisFcn}, D::Dict) =
    PIBasisFcn( read_dict(D["z0"]),
                tuple( read_dict.(D["oneps"]) ... ) )
 
@@ -211,7 +208,7 @@ end
 
 cutoff(basis::PIBasis) = cutoff(basis.basis1p)
 
-==(B1::PIBasis, B2::PIBasis) = ACE._allfieldsequal(B1, B2)
+==(B1::PIBasis, B2::PIBasis) = ACE1._allfieldsequal(B1, B2)
 
 fltype(basis::PIBasis) = fltype(basis.basis1p)
 
@@ -315,15 +312,12 @@ maxorder(basis::PIBasis) = maximum(maxorder.(basis.inner))
 #       every time we load the basis...
 
 write_dict(basis::PIBasis) =
-   Dict(  "__id__" => "ACE_PIBasis",
+   Dict(  "__id__" => "ACE1_PIBasis",
          "basis1p" => write_dict(basis.basis1p),
            "inner" => [ write_dict.( collect(keys(basis.inner[iz0].b2iAA)) )
                          for iz0 = 1:numz(basis) ], )
 
-read_dict(::Val{:SHIPs_PIBasis}, D::Dict) =
-   read_dict(Val{:ACE_PIBasis}(), D::Dict)
-
-function read_dict(::Val{:ACE_PIBasis}, D::Dict)
+function read_dict(::Val{:ACE1_PIBasis}, D::Dict)
    basis1p = read_dict(D["basis1p"])
    innerspecs = [ read_dict.(D["inner"][iz0])  for iz0 = 1:numz(basis1p) ]
    return pibasis_from_specs(basis1p, innerspecs)

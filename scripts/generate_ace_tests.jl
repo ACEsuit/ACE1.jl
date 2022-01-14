@@ -1,18 +1,18 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
-using JuLIP, ACE, LinearAlgebra
+using JuLIP, ACE1, LinearAlgebra
 using JuLIP.MLIPs: combine
 
 #--- radial basis test
 
 # Pr = basis.pibasis.basis1p.J
-# ACE.Export.export_ace(@__DIR__() * "/testpot_rbasis.ace", Pr, ntests=5)
+# ACE1.Export.export_ace(@__DIR__() * "/testpot_rbasis.ace", Pr, ntests=5)
 
 function export_dimer_test(V, fname, species=:Al)
    # export tests with the dimer structure
@@ -56,13 +56,13 @@ end
 V = nothing
 N = 1
 for maxdeg = 8:8
-   basis = ACE.Utils.rpi_basis(; species = :Al, N = N, maxdeg=maxdeg)
-   global V = ACE.Random.randcombine(basis)
+   basis = ACE1.Utils.rpi_basis(; species = :Al, N = N, maxdeg=maxdeg)
+   global V = ACE1.Random.randcombine(basis)
    # V.coeffs[1][3] = 0.0
    fname = "/testpot_ord=$(N)_maxn=$(maxdeg)"
-   ACE.Export.export_ace(@__DIR__() * fname * ".acejl", V)
+   ACE1.Export.export_ace(@__DIR__() * fname * ".acejl", V)
    JuLIP.save_dict(@__DIR__() * fname * ".json", write_dict(V))
-   # ACE.Export.export_ace_tests(@__DIR__() * "/testpot_$(N)_test", V, 3)
+   # ACE1.Export.export_ace_tests(@__DIR__() * "/testpot_$(N)_test", V, 3)
    export_dimer_test(V, fname)
 end
 
@@ -94,12 +94,12 @@ end
 ord = 2
 rcut = 6.5
 maxdeg = 4
-basis = ACE.Utils.rpi_basis(; species = :Al, N = ord, maxdeg=maxdeg,
+basis = ACE1.Utils.rpi_basis(; species = :Al, N = ord, maxdeg=maxdeg,
                                D = SparsePSHDegree(wL = 1.0), rcut=rcut)
-V = ACE.Random.randcombine(basis)
+V = ACE1.Random.randcombine(basis)
 inner = V.pibasis.inner[1]
 for b in keys(inner.b2iAA)
-   # if ACE.order(b) == 2
+   # if ACE1.order(b) == 2
    if all([b1.l == 0 for b1 in b.oneps])
       V.coeffs[1][inner.b2iAA[b]] = 0.0
    end
@@ -107,9 +107,9 @@ for b in keys(inner.b2iAA)
 end
 
 fname = "/testpot_ord=$(ord)_mini"
-ACE.Export.export_ace(@__DIR__() * fname * ".acejl", V)
+ACE1.Export.export_ace(@__DIR__() * fname * ".acejl", V)
 JuLIP.save_dict(@__DIR__() * fname * ".json", write_dict(V))
-ACE.Export.export_ace_tests(@__DIR__() * fname * "_test", V, 1, nrepeat=2)
+ACE1.Export.export_ace_tests(@__DIR__() * fname * "_test", V, 1, nrepeat=2)
 export_dimer_test(V, fname, :Al)
 export_trimer_test(V, fname, :Al)
 
@@ -132,12 +132,12 @@ for N in [2, 3, 5], maxdeg in [10, ]
 
    rcut = 6.5
 
-   basis = ACE.Utils.rpi_basis(; species = :Al, N = N, maxdeg=maxdeg, rcut=rcut)
-   V = ACE.Random.randcombine(basis)
+   basis = ACE1.Utils.rpi_basis(; species = :Al, N = N, maxdeg=maxdeg, rcut=rcut)
+   V = ACE1.Random.randcombine(basis)
    fname = "/testpot_ord=$(N)_maxn=$(maxdeg)"
-   ACE.Export.export_ace(@__DIR__() * fname * ".acejl", V)
+   ACE1.Export.export_ace(@__DIR__() * fname * ".acejl", V)
    JuLIP.save_dict(@__DIR__() * fname * ".json", write_dict(V))
-   ACE.Export.export_ace_tests(@__DIR__() * fname * "_test", V, 1)
+   ACE1.Export.export_ace_tests(@__DIR__() * fname * "_test", V, 1)
    export_dimer_test(V, fname, :Al)
    export_trimer_test(V, fname, :Al)
 
@@ -162,11 +162,11 @@ end
 #  - add on also E0
 #  - move pairpot rcut to 7.0
 
-basis = ACE.Utils.rpi_basis(; species = :Al, N = 4, maxdeg=8, pin = 2)
+basis = ACE1.Utils.rpi_basis(; species = :Al, N = 4, maxdeg=8, pin = 2)
 VN = randcombine(basis; diff=2)
-pairbasis = ACE.Utils.pair_basis(; species = :Al, maxdeg = 8, rcut = 5.0)
+pairbasis = ACE1.Utils.pair_basis(; species = :Al, maxdeg = 8, rcut = 5.0)
 V2 = combine(pairbasis, rand(8) .* (1:8).^(-2))
-V2rep = ACE.PairPotentials.RepulsiveCore(V2, 2.0, -0.1234)
+V2rep = ACE1.PairPotentials.RepulsiveCore(V2, 2.0, -0.1234)
 V1 = OneBody(:Al => -1.5 + rand())
 V = JuLIP.MLIPs.SumIP(V1, V2rep, VN)
 
@@ -174,8 +174,8 @@ fname = "/ace_reppair"
 JuLIP.save_dict(@__DIR__() * fname * ".json", write_dict(V))
 # Vl = read_dict(load_dict(@__DIR__() * fname * ".json"))
 # V1, V2rep, VN = tuple(Vl.components...)
-ACE.Export.export_ace(@__DIR__() * fname * ".acejl", VN, V2rep, V1)
-ACE.Export.export_ace_tests(@__DIR__() * fname * "_test", V, 1, s=:Al)
+ACE1.Export.export_ace(@__DIR__() * fname * ".acejl", VN, V2rep, V1)
+ACE1.Export.export_ace_tests(@__DIR__() * fname * "_test", V, 1, s=:Al)
 export_dimer_test(V, fname, :Al)
 export_trimer_test(V, fname, :Al)
 
@@ -200,9 +200,9 @@ end
 fname = "/Si_B6_N7_18_lap_1.1_rep"
 D = load_dict(@__DIR__() * fname * ".json")
 Vsi = read_dict(D["IP"])
-ACE.Export.export_ace(@__DIR__() * fname * ".acejl",
+ACE1.Export.export_ace(@__DIR__() * fname * ".acejl",
                       Vsi.components[3], Vsi.components[2], Vsi.components[1])
-ACE.Export.export_ace_tests(@__DIR__() * fname * "_test", Vsi, 1, s=:Si)
+ACE1.Export.export_ace_tests(@__DIR__() * fname * "_test", Vsi, 1, s=:Si)
 export_dimer_test(Vsi, fname, :Si)
 export_trimer_test(Vsi, fname, :Si)
 
@@ -225,8 +225,8 @@ fname = "/Si_B6_N7_18_lap_1"
 VN = Vsi.components[3]
 V2 = Vsi.components[2]
 V1 = Vsi.components[1]
-ACE.Export.export_ace(@__DIR__() * fname * ".acejl", VN)
-ACE.Export.export_ace_tests(@__DIR__() * fname * "_test", VN, 1, s=:Si)
+ACE1.Export.export_ace(@__DIR__() * fname * ".acejl", VN)
+ACE1.Export.export_ace_tests(@__DIR__() * fname * "_test", VN, 1, s=:Si)
 export_dimer_test(VN, fname, :Si)
 export_trimer_test(VN, fname, :Si)
 filelist = [ fname * ".acejl",
@@ -262,5 +262,5 @@ end
 # z = AtomicNumber(:Si)
 #
 # J = VN.pibasis.basis1p.J
-# ACE.evaluate(J, r)
+# ACE1.evaluate(J, r)
 # J

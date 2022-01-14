@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -10,9 +10,9 @@
 @testset "Transforms" begin
 
 ##
-using ACE, Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
+using ACE1, Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d
-import ACE.Testing: println_slim
+import ACE1.Testing: println_slim
 
 verbose = false
 maxdeg = 10
@@ -50,15 +50,15 @@ end
 for p = 2:4
    r0 = 1+rand()
    trans = PolyTransform(p, r0)
-   ACE.Testing.test_transform(trans, [r0/2, 3*r0])
+   ACE1.Testing.test_transform(trans, [r0/2, 3*r0])
 end
 
 ##
 @info("Testing Morse Transform")
 for lam = 1.0:3.0
    r0 = 1+rand()
-   trans = ACE.Transforms.MorseTransform(lam, r0)
-   ACE.Testing.test_transform(trans, [r0/2, 3*r0])
+   trans = ACE1.Transforms.MorseTransform(lam, r0)
+   ACE1.Testing.test_transform(trans, [r0/2, 3*r0])
 end
 
 ##
@@ -66,23 +66,23 @@ end
 @info("Testing Agnesi Transform")
 for p = 2:4
    r0 = 1+rand()
-   trans = ACE.Transforms.AgnesiTransform(r0, p)
-   ACE.Testing.test_transform(trans, [r0/2, 3*r0])
+   trans = ACE1.Transforms.AgnesiTransform(r0, p)
+   ACE1.Testing.test_transform(trans, [r0/2, 3*r0])
 end
 
 ##
 
 @info("Testing AnalyticTransform")
-trans = ACE.Transforms.AnalyticTransform("r -> exp(-r)", "x -> - log(x)")
-ACE.Testing.test_transform(trans, [0.3, 3.0])
+trans = ACE1.Transforms.AnalyticTransform("r -> exp(-r)", "x -> - log(x)")
+ACE1.Testing.test_transform(trans, [0.3, 3.0])
 println()
 println_slim(@test all(JuLIP.Testing.test_fio(trans)))
 
 # log x = - 1.234 * r^2 
 # sqrt(- log x / 1.234) = r 
-trans = ACE.Transforms.AnalyticTransform(
+trans = ACE1.Transforms.AnalyticTransform(
             "r -> exp(- 1.234 * r^2)", "x -> sqrt(- log(x) / 1.234)")
-ACE.Testing.test_transform(trans, [0.1, 2.345])
+ACE1.Testing.test_transform(trans, [0.1, 2.345])
 println()
 println_slim(@test all(JuLIP.Testing.test_fio(trans)))
 
@@ -97,7 +97,7 @@ println_slim(@test all(JuLIP.Testing.test_fio(trans)))
 # plot(; size = (500, 300))
 # for p = 2:4
 #    tpoly = PolyTransform(p, r0)
-#    tagnesi = ACE.Transforms.AgnesiTransform(r0, p)
+#    tagnesi = ACE1.Transforms.AgnesiTransform(r0, p)
 #    plot!(rr, tagnesi.(rr), lw=2, c=p-1, label = "p = $p")
 #    plot!(rr, tpoly.(rr), lw=2, c=p-1, ls = :dash, label = "")
 # end
@@ -120,7 +120,7 @@ println_slim(@test all(JuLIP.Testing.test_fio(trans)))
 #       xx = T.(rr)
 #    else
 #       xx = range(x0, x1, length=nrays)
-#       rr = ACE.Transforms.inv_transform.(Ref(T), xx)
+#       rr = ACE1.Transforms.inv_transform.(Ref(T), xx)
 #    end
 #    rnn = (rnn - rr[1]) / (rr[end] - rr[1])
 #    xnn = (xnn - xx[1]) / (xx[end] - xx[1])

@@ -1,13 +1,13 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
 
-using ACE.SphericalHarmonics: SHBasis, index_y
+using ACE1.SphericalHarmonics: SHBasis, index_y
 using StaticArrays
 using JuLIP: AbstractCalculator, Atoms, JVec
 using JuLIP.Potentials: SitePotential, SZList, ZList
@@ -102,7 +102,7 @@ function deletezeros(V::PIPotential)
       inner = V.pibasis.inner[iz0]     # old
       iAA2iA = inner.iAA2iA[Inz, :]    # new
       # construct the new b2iAA mapping
-      b2iAA = Dict{ACE.PIBasisFcn, Int}()   # new
+      b2iAA = Dict{ACE1.PIBasisFcn, Int}()   # new
       for (b, iAA) in inner.b2iAA
          if haskey(invInz, iAA)
             b2iAA[b] = invInz[iAA]
@@ -110,13 +110,13 @@ function deletezeros(V::PIPotential)
       end
       # create the new inner basis
       push!(innernew,
-            ACE.InnerPIBasis( inner.orders[Inz],
+            ACE1.InnerPIBasis( inner.orders[Inz],
                               iAA2iA,
                               b2iAA,
                               inner.b2iA,
                               (idx0+1):(idx0+length(Inz)),
                               inner.z0,
-                              ACE.DAG.CorrEvalGraph{Int, Int}() ) )
+                              ACE1.DAG.CorrEvalGraph{Int, Int}() ) )
       # and the new coefficients
       push!(coeffs, V.coeffs[iz0][Inz])
    end
@@ -130,16 +130,16 @@ end
 # ------------------------------------------------------------
 
 write_dict(V::PIPotential) = Dict(
-      "__id__" => "ACE_PIPotential",
+      "__id__" => "ACE1_PIPotential",
      "pibasis" => write_dict(V.pibasis),
       "coeffs" => [ write_dict.(V.coeffs)... ] )
 
 #    if ntests > 0
-#       tests = ACE.Random.rand_nhd(Nat, J::ScalarBasis, species = :X)
+#       tests = ACE1.Random.rand_nhd(Nat, J::ScalarBasis, species = :X)
 #       Pr = V.pibasis.basis1p.J
 #       for ntest = 1:5
 #
-#          r = ACE.rand_radial(V.pibasis.basis1p.J)
+#          r = ACE1.rand_radial(V.pibasis.basis1p.J)
 #          Pr = evaluate(B3.J, r)
 #          push!(rtests, Dict("r" => r, "Pr" => Pr))
 #       end
@@ -148,10 +148,7 @@ write_dict(V::PIPotential) = Dict(
 #    return D
 # end
 
-read_dict(::Val{:SHIPs_PIPotential}, D::Dict; tests = true) =
-   read_dict(Val{:ACE_PIPotential}(), D)
-
-read_dict(::Val{:ACE_PIPotential}, D::Dict; tests = true) =
+read_dict(::Val{:ACE1_PIPotential}, D::Dict; tests = true) =
    PIPotential( read_dict(D["pibasis"]),
                 tuple( read_dict.( D["coeffs"] )... ) )
 

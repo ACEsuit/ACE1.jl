@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -11,10 +11,10 @@
 #---
 
 
-using ACE, ACE.Testing
+using ACE1, ACE1.Testing
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing, Random
 using JuLIP: evaluate, evaluate_d, evaluate_ed
-using ACE: combine
+using ACE1: combine
 
 #---
 
@@ -24,14 +24,14 @@ r0 = 1.0
 rcut = 3.0
 trans = PolyTransform(1, r0)
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
-D = ACE.SparsePSHDegree()
-P1 = ACE.BasicPSH1pBasis(Pr; species = :X, D = D)
-basis = ACE.PIBasis(P1, 2, D, maxdeg)
-c = ACE.Random.randcoeffs(basis)
+D = ACE1.SparsePSHDegree()
+P1 = ACE1.BasicPSH1pBasis(Pr; species = :X, D = D)
+basis = ACE1.PIBasis(P1, 2, D, maxdeg)
+c = ACE1.Random.randcoeffs(basis)
 Vdag = combine(basis, c)
 V = standardevaluator(Vdag)
 Nat = 15
-Rs, Zs, z0 = ACE.rand_nhd(Nat, Pr, :X)
+Rs, Zs, z0 = ACE1.rand_nhd(Nat, Pr, :X)
 val_basis = real(sum(c .* evaluate(basis, Rs, Zs, z0)))
 val_V = evaluate(V, Rs, Zs, z0)
 println_slim(@test(val_basis ≈ val_V))
@@ -50,12 +50,12 @@ println(@test(all(JuLIP.Testing.test_fio(V))))
 maxdeg = 5
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
 species = [:C, :O, :H]
-P1 = ACE.BasicPSH1pBasis(Pr; species = [:C, :O, :H], D = D)
-basis = ACE.PIBasis(P1, 3, D, maxdeg)
+P1 = ACE1.BasicPSH1pBasis(Pr; species = [:C, :O, :H], D = D)
+basis = ACE1.PIBasis(P1, 3, D, maxdeg)
 c = randcoeffs(basis)
 Vdag = combine(basis, c)
 V = standardevaluator(Vdag)
-Rs, Zs, z0 = ACE.rand_nhd(Nat, Pr, species)
+Rs, Zs, z0 = ACE1.rand_nhd(Nat, Pr, species)
 AA = evaluate(basis, Rs, Zs, z0)
 val_basis = real(sum(c .* evaluate(basis, Rs, Zs, z0)))
 val_V = evaluate(V, Rs, Zs, z0)
@@ -76,8 +76,8 @@ for species in (:X, :Si, [:C, :O, :H]), N = 1:5
    local Rs, Zs, z0, V, Vdag, basis, P1, maxdeg, Nat, c, val_basis, val_V
    maxdeg = 7
    Nat = 15
-   P1 = ACE.BasicPSH1pBasis(Pr; species = species)
-   basis = ACE.PIBasis(P1, N, D, maxdeg)
+   P1 = ACE1.BasicPSH1pBasis(Pr; species = species)
+   basis = ACE1.PIBasis(P1, N, D, maxdeg)
    @info("species = $species; N = $N; length = $(length(basis))")
    c = randcoeffs(basis)
    Vdag = combine(basis, c)
@@ -86,7 +86,7 @@ for species in (:X, :Si, [:C, :O, :H]), N = 1:5
    println_slim(@test(all(JuLIP.Testing.test_fio(Vdag))))
    @info("Check basis and potential match")
    for ntest = 1:20
-      Rs, Zs, z0 = ACE.rand_nhd(Nat, Pr, species)
+      Rs, Zs, z0 = ACE1.rand_nhd(Nat, Pr, species)
       val_basis = real(sum(c .* evaluate(basis, Rs, Zs, z0)))
       val_V = evaluate(V, Rs, Zs, z0)
       print_tf(@test(val_basis ≈ val_V))
@@ -94,7 +94,7 @@ for species in (:X, :Si, [:C, :O, :H]), N = 1:5
    println()
    @info("Check gradients")
    for ntest = 1:20
-      Rs, Zs, z0 = ACE.rand_nhd(Nat, Pr, species)
+      Rs, Zs, z0 = ACE1.rand_nhd(Nat, Pr, species)
       V0 = evaluate(V, Rs, Zs, z0)
       dV0 = evaluate_d(V, Rs, Zs, z0)
       Us = [ rand(eltype(Rs)) .- 0.5 for _=1:length(Rs) ]
@@ -113,7 +113,7 @@ for species in (:X, :Si, [:C, :O, :H]), N = 1:5
    println()
    @info("Check graph evaluator")
    for ntest = 1:20
-      Rs, Zs, z0 = ACE.rand_nhd(Nat, Pr, species)
+      Rs, Zs, z0 = ACE1.rand_nhd(Nat, Pr, species)
       v = evaluate(V, Rs, Zs, z0)
       vgr = evaluate(Vdag, Rs, Zs, z0)
       print_tf(@test(v ≈ vgr))
@@ -125,7 +125,7 @@ println()
 #---
 
 
-@info("Check Correctness of SHIP.PIPotential calculators")
+@info("Check Correctness of ACE1.PIPotential calculators")
 
 naive_energy(V::PIPotential, at) =
       sum( evaluate(V, Rs, at.Z[j], at.Z[i])
@@ -135,8 +135,8 @@ for N = 1:5
    species = :Si
    maxdeg = 7
    Pr = transformed_jacobi(maxdeg, trans, 4.0; pcut = 2)
-   P1 = ACE.BasicPSH1pBasis(Pr; species = species)
-   basis = ACE.PIBasis(P1, N, D, maxdeg)
+   P1 = ACE1.BasicPSH1pBasis(Pr; species = species)
+   basis = ACE1.PIBasis(P1, N, D, maxdeg)
    @info("N = $N; length = $(length(basis))")
    c = randcoeffs(basis)
    V = combine(basis, c)

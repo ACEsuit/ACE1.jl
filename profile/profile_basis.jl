@@ -1,17 +1,17 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
 
-using ACE, Random
+using ACE1, Random
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d, evaluate!, evaluate_d!,
              alloc_temp, alloc_temp_d
-using ACE: alloc_B, alloc_dB
+using ACE1: alloc_B, alloc_dB
 using BenchmarkTools
 using Juno
 
@@ -26,16 +26,16 @@ for species in (:Si, ), N = 2:2:6, maxdeg in degrees[N]
    rcut = 5.0
    trans = PolyTransform(1, r0)
    Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
-   P1 = ACE.BasicPSH1pBasis(Pr; species = species)
-   D = ACE.SparsePSHDegree()
+   P1 = ACE1.BasicPSH1pBasis(Pr; species = species)
+   D = ACE1.SparsePSHDegree()
 
-   basis = ACE.PIBasis(P1, N, D, maxdeg, evaluator = :classic)
-   basisdag = ACE.PIBasis(P1, N, D, maxdeg, evaluator = :dag)
+   basis = ACE1.PIBasis(P1, N, D, maxdeg, evaluator = :classic)
+   basisdag = ACE1.PIBasis(P1, N, D, maxdeg, evaluator = :dag)
 
    @info("species = $species; N = $N; length = $(length(basis))")
 
    for Nat in [5, 50]
-      Rs, Zs, z0 = ACE.Random.rand_nhd(Nat, basis.basis1p.J,
+      Rs, Zs, z0 = ACE1.Random.rand_nhd(Nat, basis.basis1p.J,
                                          species)
       tmp = alloc_temp(basis, Rs, Zs, z0)
       tmpd = alloc_temp_d(basis, Rs, Zs, z0)
@@ -65,12 +65,12 @@ end
 # rcut = 5.0
 # trans = PolyTransform(1, r0)
 # Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
-# P1 = ACE.BasicPSH1pBasis(Pr; species = species)
-# D = ACE.SparsePSHDegree()
+# P1 = ACE1.BasicPSH1pBasis(Pr; species = species)
+# D = ACE1.SparsePSHDegree()
 #
-# Rs, Zs, z0 = ACE.Random.rand_nhd(30, Pr, species)
-# basis = ACE.PIBasis(P1, N, D, maxdeg, evaluator = :classic)
-# basisdag = ACE.PIBasis(P1, N, D, maxdeg, evaluator = :dag)
+# Rs, Zs, z0 = ACE1.Random.rand_nhd(30, Pr, species)
+# basis = ACE1.PIBasis(P1, N, D, maxdeg, evaluator = :classic)
+# basisdag = ACE1.PIBasis(P1, N, D, maxdeg, evaluator = :dag)
 # tmp = alloc_temp(basis, Rs, Zs, z0)
 # tmpd = alloc_temp_d(basis, Rs, Zs, z0)
 # tmpdag = alloc_temp(basisdag, Rs, Zs, z0)

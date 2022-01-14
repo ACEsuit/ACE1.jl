@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -10,7 +10,7 @@
 module Testing
 
 using Test
-import ACE
+import ACE1
 import InteractiveUtils
 
 
@@ -37,11 +37,11 @@ export println_slim
 
 # ---------- code for consistency tests
 
-test_basis(D::Dict) = ACE.Utils.rpi_basis(;
+test_basis(D::Dict) = ACE1.Utils.rpi_basis(;
                species = Symbol.(D["species"]), N = D["N"],
                maxdeg = D["maxdeg"],
                r0 = D["r0"], rcut = D["rcut"],
-               D = ACE.RPI.SparsePSHDegree(wL = D["wL"]) )
+               D = ACE1.RPI.SparsePSHDegree(wL = D["wL"]) )
 
 
 _evaltest(::Val{:E}, V, at) = energy(V, at)
@@ -50,7 +50,7 @@ _evaltest(::Val{:F}, V, at) = vec(forces(V, at))
 function createtests(V, ntests; tests = ["E", "F"], kwargs...)
    testset = Dict[]
    for n = 1:ntests
-      at = ACE.Random.rand_config(V; kwargs...)
+      at = ACE1.Random.rand_config(V; kwargs...)
       D = Dict("at" => write_dict(at), "tests" => Dict())
       for t in tests
          D["tests"][t] = _evaltest(Val(Symbol(t)), V, at)
@@ -77,7 +77,7 @@ end
 # ---------- code for transform tests
 
 import ForwardDiff
-import ACE.Transforms: transform, transform_d, inv_transform
+import ACE1.Transforms: transform, transform_d, inv_transform
 
 function test_transform(T, rrange, ntests = 100)
 

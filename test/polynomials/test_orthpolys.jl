@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -11,10 +11,10 @@
 @info("--------- Testing OrthogonalPolynomials ----------")
 
 ##
-using ACE, Test, ForwardDiff, JuLIP, JuLIP.Testing
+using ACE1, Test, ForwardDiff, JuLIP, JuLIP.Testing
 
 using LinearAlgebra: norm, cond
-using ACE.OrthPolys: OrthPolyBasis
+using ACE1.OrthPolys: OrthPolyBasis
 using JuLIP: evaluate, evaluate_d
 
 ##
@@ -79,7 +79,7 @@ end
 @info("Testing TransformedPolys")
 
 trans = PolyTransform(2, 1.0)
-Pnew = ACE.OrthPolys.transformed_jacobi(10, trans, 2.0, 0.5; pcut = 2, pin = 2)
+Pnew = ACE1.OrthPolys.transformed_jacobi(10, trans, 2.0, 0.5; pcut = 2, pin = 2)
 
 @info("   ... consistency of derivatives")
 for ntest = 1:30
@@ -100,22 +100,22 @@ println()
 # @info("Testing the orthogonality (via A-basis)")
 #
 # spec = SparseSHIP(3, 10)
-# P = ACE.OrthPolys.transformed_jacobi(ACE.maxK(spec)+1, trans, 2.0, 0.5;
+# P = ACE1.OrthPolys.transformed_jacobi(ACE1.maxK(spec)+1, trans, 2.0, 0.5;
 #                                       pcut = 2, pin = 2)
 # aceB = SHIPBasis(spec, P)
 #
 # function evalA(aceB, tmp, Rs)
 #    Zs = zeros(Int16, length(Rs))
-#    ACE.precompute_A!(tmp, aceB, Rs, Zs, 1)
+#    ACE1.precompute_A!(tmp, aceB, Rs, Zs, 1)
 #    return tmp.A[1]
 # end
 #
 # function A_gramian(aceB, Nsamples = 100_000)
-#    tmp = ACE.alloc_temp(aceB)
+#    tmp = ACE1.alloc_temp(aceB)
 #    lenA = length(tmp.A[1])
 #    G = zeros(ComplexF64, lenA, lenA)
 #    for n = 1:Nsamples
-#       R = ACE.rand_vec(aceB.J)
+#       R = ACE1.rand_vec(aceB.J)
 #       A = evalA(aceB, tmp, [R])
 #       for i = 1:lenA, j = 1:lenA
 #          G[i,j] +=  A[i] * A[j]'
@@ -134,7 +134,7 @@ end
 # ## Quick look at the basis
 # using Plots
 # N = 5
-# Jd = ACE.OrthPolys.discrete_jacobi(N; pcut = 3, pin = 2)
+# Jd = ACE1.OrthPolys.discrete_jacobi(N; pcut = 3, pin = 2)
 # tp = range(-1, 1, length=100)
 # Jp = zeros(length(tp), N)
 # for (i,t) in enumerate(tp)

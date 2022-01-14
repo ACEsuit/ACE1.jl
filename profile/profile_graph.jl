@@ -1,20 +1,20 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
-using ACE, JuLIP, BenchmarkTools
+using ACE1, JuLIP, BenchmarkTools
 
 #---
 
 
 
-basis = ACE.Utils.rpi_basis(; species=:Si, N = 5, maxdeg = 14)
+basis = ACE1.Utils.rpi_basis(; species=:Si, N = 5, maxdeg = 14)
 @show length(basis)
-V = ACE.Random.randcombine(basis)
+V = ACE1.Random.randcombine(basis)
 
 #---
 

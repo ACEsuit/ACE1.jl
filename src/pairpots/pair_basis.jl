@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -64,14 +64,11 @@ end
 JuLIP.cutoff(pB::PolyPairBasis) = cutoff(pB.J)
 
 write_dict(pB::PolyPairBasis) = Dict(
-      "__id__" => "ACE_PolyPairBasis",
+      "__id__" => "ACE1_PolyPairBasis",
           "Pr" => write_dict(pB.J),
        "zlist" => write_dict(pB.zlist) )
 
-read_dict(::Val{:SHIPs_PolyPairBasis}, D::Dict) =
-   read_dict(Val{:ACE_PolyPairBasis}(), D)
-
-read_dict(::Val{:ACE_PolyPairBasis}, D::Dict) =
+read_dict(::Val{:ACE1_PolyPairBasis}, D::Dict) =
       PolyPairBasis( read_dict(D["Pr"]), read_dict(D["zlist"]) )
 
 alloc_temp(pB::PolyPairBasis, args...) = (

@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -11,7 +11,7 @@ module Rotations3D
 
 using StaticArrays
 using LinearAlgebra: norm, rank, svd, Diagonal
-using ACE.SphericalHarmonics: index_y
+using ACE1.SphericalHarmonics: index_y
 using Combinatorics: permutations
 
 export ClebschGordan, Rot3DCoeffs, ri_basis, rpi_basis

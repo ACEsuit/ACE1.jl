@@ -1,14 +1,14 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
 
-using ACE, JuLIP, Test
-using ACE: evaluate
+using ACE1, JuLIP, Test
+using ACE1: evaluate
 using JuLIP.Testing: print_tf
 
 
@@ -23,22 +23,22 @@ maxn = 5
 species = [:X ]
 D = SparsePSHDegree(wL = 1.0)
 
-trans = ACE.PolyTransform(1, r0)
-J = ACE.OrthPolys.transformed_jacobi(10, trans, rcut, rin)
-P1 = ACE.RPI.PSH1pBasis(J, maxn, D=D, species = species)
+trans = ACE1.PolyTransform(1, r0)
+J = ACE1.OrthPolys.transformed_jacobi(10, trans, rcut, rin)
+P1 = ACE1.RPI.PSH1pBasis(J, maxn, D=D, species = species)
 
 basis = RPIBasis(P1, 3, D, maxn)
 
-J5 = ACE.OrthPolys.transformed_jacobi(5, trans, rcut, rin)
-P1basic = ACE.RPI.BasicPSH1pBasis(J5)
+J5 = ACE1.OrthPolys.transformed_jacobi(5, trans, rcut, rin)
+P1basic = ACE1.RPI.BasicPSH1pBasis(J5)
 basic = RPIBasis(P1basic, 3, D, maxn)
 
 #--- first test: make sure the bases are equivalent
 
 @info("Test bases with and without parameters match")
 for ntest = 1:30
-   local R, Z, z0 = ACE.Random.rand_nhd(12, J, species)
-   print_tf(@test ACE.evaluate(basis, R, Z, z0) ≈ ACE.evaluate(basic, R, Z, z0))
+   local R, Z, z0 = ACE1.Random.rand_nhd(12, J, species)
+   print_tf(@test ACE1.evaluate(basis, R, Z, z0) ≈ ACE1.evaluate(basic, R, Z, z0))
 end
 println()
 
@@ -48,7 +48,7 @@ println()
 params = basis.pibasis.basis1p.C[1]
 basis.pibasis.basis1p.C[1] .+= 0.1 * (rand(size(params)...) .- 0.5)
 for ntest = 1:30
-   local R, Z, z0 = ACE.Random.rand_nhd(12, J, species)
-   print_tf(@test !(ACE.evaluate(basis, R, Z, z0) ≈ ACE.evaluate(basic, R, Z, z0)))
+   local R, Z, z0 = ACE1.Random.rand_nhd(12, J, species)
+   print_tf(@test !(ACE1.evaluate(basis, R, Z, z0) ≈ ACE1.evaluate(basic, R, Z, z0)))
 end
 println()

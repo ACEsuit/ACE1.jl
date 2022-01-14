@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -8,9 +8,9 @@
 
 module Utils
 
-import ACE.RPI: BasicPSH1pBasis, SparsePSHDegree, RPIBasis, get_maxn
-import ACE: PolyTransform, transformed_jacobi
-import ACE.PairPotentials: PolyPairBasis
+import ACE1.RPI: BasicPSH1pBasis, SparsePSHDegree, RPIBasis, get_maxn
+import ACE1: PolyTransform, transformed_jacobi
+import ACE1.PairPotentials: PolyPairBasis
 
 # - simple ways to construct a radial basis
 # - construct a descriptor

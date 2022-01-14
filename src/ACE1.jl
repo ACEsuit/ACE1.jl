@@ -1,12 +1,12 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
-module ACE
+module ACE1
 
 using Reexport
 @reexport using JuLIP
@@ -21,8 +21,8 @@ include("prototypes.jl")
 
 # basic polynomial building blocks
 include("polynomials/sphericalharmonics.jl")
-include("polynomials/transforms.jl"); @reexport using ACE.Transforms
-include("polynomials/orthpolys.jl"); @reexport using ACE.OrthPolys
+include("polynomials/transforms.jl"); @reexport using ACE1.Transforms
+include("polynomials/orthpolys.jl"); @reexport using ACE1.OrthPolys
 
 
 # The One-particle basis is the first proper building block
@@ -37,24 +37,23 @@ include("pipot.jl")
 
 # rotation-invariant site potentials (incl the ACE model)
 include("rpi/rpi.jl")
-@reexport using ACE.RPI
+@reexport using ACE1.RPI
 
 # pair potentials + repulsion
 include("pairpots/pair.jl");
-@reexport using ACE.PairPotentials
+@reexport using ACE1.PairPotentials
 
 # lots of stuff related to random samples:
 #  - random configurations
 #  - random potentials
 #  ...
 include("random.jl")
-@reexport using ACE.Random
+@reexport using ACE1.Random
 
 
 include("utils.jl")
-@reexport using ACE.Utils
+@reexport using ACE1.Utils
 
-include("utils/importv5.jl")
 
 
 include("compat/compat.jl")

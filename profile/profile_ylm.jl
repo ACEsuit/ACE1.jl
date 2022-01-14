@@ -1,15 +1,15 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
-using StaticArrays, ACE, BenchmarkTools, LinearAlgebra
-using ACE.SphericalHarmonics
-SH = ACE.SphericalHarmonics
-using ACE: alloc_temp, alloc_temp_d, alloc_B, alloc_dB, evaluate!, evaluate_d!
+using StaticArrays, ACE1, BenchmarkTools, LinearAlgebra
+using ACE1.SphericalHarmonics
+SH = ACE1.SphericalHarmonics
+using ACE1: alloc_temp, alloc_temp_d, alloc_B, alloc_dB, evaluate!, evaluate_d!
 
 @info("Spherical Harmonics Evaluation")
 
@@ -20,7 +20,7 @@ suite = BenchmarkGroup()
 # (@benchmark runmany!($Y, $tmp, $basis, 100)) |> display
 # @btime runmany!($Y, $tmp, $basis, 100)
 #
-# R = ACE.rand_sphere()
+# R = ACE1.rand_sphere()
 # @btime evaluate!($Y, $tmp, $basis, $R)
 
 R = JVecF(0.4, 0.7, -0.9)

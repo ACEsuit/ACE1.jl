@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -11,7 +11,7 @@ module SphericalHarmonics
 
 using StaticArrays, LinearAlgebra
 
-import ACE
+import ACE1
 
 import JuLIP.MLIPs: IPBasis, alloc_B, alloc_dB, fltype
 import JuLIP: alloc_temp, alloc_temp_d, evaluate!, evaluate_d!,
@@ -470,14 +470,11 @@ import Base.==
 	  (typeof(B1) == typeof(B2)) )
 
 write_dict(SH::SHBasis{T}) where {T} =
-		Dict("__id__" => "ACE_SHBasis",
+		Dict("__id__" => "ACE1_SHBasis",
 			  "T" => write_dict(T),
 			  "maxL" => SH.maxL)
 
-read_dict(::Val{:SHIPs_SHBasis}, D::Dict) =
-	read_dict(Val{:ACE_SHBasis}(), D)
-
-read_dict(::Val{:ACE_SHBasis}, D::Dict) =
+read_dict(::Val{:ACE1_SHBasis}, D::Dict) =
 		SHBasis(D["maxL"], read_dict(D["T"]))
 
 SHBasis(maxL::Integer, T::Type=Float64) =

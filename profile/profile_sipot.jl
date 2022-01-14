@@ -1,18 +1,18 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
-using ACE, JuLIP, BenchmarkTools
+using ACE1, JuLIP, BenchmarkTools
 
 #---
 
 fname = "/Users/ortner/Dropbox/Public/SHIPPots/Si_split_1.2_reg_test_v05.json"
 D = load_dict(fname)
-V = ACE.Import.import_pipot_v05(D)
+V = ACE1.Import.import_pipot_v05(D)
 
 at = bulk(:Si, cubic=true) * 3;
 @show length(at)
@@ -41,7 +41,7 @@ println(" $((@timed forces(V, at)).time / length(at) * 1000) ms")
 
 @info("Graph Evaluator")
 println("(it takes a long time to generate the graph - sorry!")
-Vgr = ACE.GraphPIPot(V)
+Vgr = ACE1.GraphPIPot(V)
 println("Number of nodes")
 @show length(Vgr.dags[1].nodes)
 

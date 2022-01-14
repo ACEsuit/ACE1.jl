@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -12,7 +12,7 @@ module Transforms
 import Base:   ==
 import JuLIP:  cutoff, AtomicNumber
 import JuLIP.FIO: read_dict, write_dict
-import ACE: _allfieldsequal
+import ACE1: _allfieldsequal
 
 abstract type DistanceTransform end
 
@@ -52,14 +52,11 @@ struct PolyTransform{TP, T} <: DistanceTransform
 end
 
 write_dict(T::PolyTransform) =
-   Dict("__id__" => "ACE_PolyTransform", "p" => T.p, "r0" => T.r0)
+   Dict("__id__" => "ACE1_PolyTransform", "p" => T.p, "r0" => T.r0)
 
 PolyTransform(D::Dict) = PolyTransform(D["p"], D["r0"])
 
-read_dict(::Val{:SHIPs_PolyTransform}, D::Dict) =
-   read_dict(Val{:ACE_PolyTransform}(), D::Dict)
-
-read_dict(::Val{:ACE_PolyTransform}, D::Dict) = PolyTransform(D)
+read_dict(::Val{:ACE1_PolyTransform}, D::Dict) = PolyTransform(D)
 
 transform(t::PolyTransform, r::Number) = poly_trans(t.p, t.r0, r)
 
@@ -78,15 +75,13 @@ Constructor: `IdTransform()`
 struct IdTransform <: DistanceTransform
 end
 
-write_dict(T::IdTransform) =  Dict("__id__" => "ACE_IdTransform")
+write_dict(T::IdTransform) =  Dict("__id__" => "ACE1_IdTransform")
 IdTransform(D::Dict) = IdTransform()
-read_dict(::Val{:ACE_IdTransform}, D::Dict) = IdTransform(D)
+read_dict(::Val{:ACE1_IdTransform}, D::Dict) = IdTransform(D)
 transform(t::IdTransform, z::Number) = z
 transform_d(t::IdTransform, r::Number) = one(r)
 inv_transform(t::IdTransform, x::Number) = x
 
-read_dict(::Val{:SHIPs_IdTransform}, D::Dict) =
-   read_dict(Val{:ACE_IdTransform}(), D)
 
    
 
@@ -108,9 +103,9 @@ struct MorseTransform{T} <: DistanceTransform
 end
 
 write_dict(T::MorseTransform) =
-   Dict("__id__" => "ACE_MorseTransform", "lambda" => T.p, "r0" => T.r0)
+   Dict("__id__" => "ACE1_MorseTransform", "lambda" => T.p, "r0" => T.r0)
 MorseTransform(D::Dict) = MorseTransform(D["lambda"], D["r0"])
-read_dict(::Val{:ACE_MorseTransform}, D::Dict) = MorseTransform(D)
+read_dict(::Val{:ACE1_MorseTransform}, D::Dict) = MorseTransform(D)
 transform(t::MorseTransform, r::Number) = exp(- t.lambda * (r/t.r0))
 transform_d(t::MorseTransform, r::Number) = (-t.lambda/t.r0) * exp(- t.lambda * (r/t.r0))
 inv_transform(t::MorseTransform, x::Number) = - t.r0/t.lambda * log(x)
@@ -142,9 +137,9 @@ AgnesiTransform(r0, p=2, a=(p-1)/(p+1)) = (@assert p > 1;
                              AgnesiTransform(r0, p, a, - a * p / r0))
 
 write_dict(T::AgnesiTransform) =
-Dict("__id__" => "ACE_AgnesiTransform", "r0" => T.r0, "p" => T.p, "a" => T.a)
+Dict("__id__" => "ACE1_AgnesiTransform", "r0" => T.r0, "p" => T.p, "a" => T.a)
 AgnesiTransform(D::Dict) = AgnesiTransform(D["r0"], D["p"], D["a"])
-read_dict(::Val{:ACE_AgnesiTransform}, D::Dict) = AgnesiTransform(D)
+read_dict(::Val{:ACE1_AgnesiTransform}, D::Dict) = AgnesiTransform(D)
 transform(t::AgnesiTransform, r::Number) = @fastmath 1 / (1 + t.a * (r/t.r0)^t.p)
 transform_d(t::AgnesiTransform, r::Number) = (s1 = (r/t.r0); s2 = s1^(t.p-1);
                                          @fastmath t.c * s2 / (1+t.a * s2*s1)^2)
@@ -170,7 +165,7 @@ For `forwardmap` and `inversemap` must both be of type `AnalyticFunction`.
 
 Example: 
 ```julia
-using ACE: AnalyticTransform
+using ACE1: AnalyticTransform
 using JuLIP: @analytic
 trans = AnalyticTransform( :(r -> exp( - 2 * r )), 
                            :(x -> -0.5 * log(x)) )
@@ -201,10 +196,10 @@ end
 
 
 write_dict(T::AnalyticTransform) =
-         Dict("__id__" => "ACE_AnalyticTransform", 
+         Dict("__id__" => "ACE1_AnalyticTransform", 
               "f" => T.str_f, "finv" => T.str_finv)
 AnalyticTransform(D::Dict) = AnalyticTransform(D["f"], D["finv"])
-read_dict(::Val{:ACE_AnalyticTransform}, D::Dict) = AnalyticTransform(D)
+read_dict(::Val{:ACE1_AnalyticTransform}, D::Dict) = AnalyticTransform(D)
 
 transform(t::AnalyticTransform, r::Number) = t.f(r)
 transform_d(t::AnalyticTransform, r::Number) = t.df(r) 
@@ -240,11 +235,11 @@ inv_transform(t::AffineT, y) = inv_transform(t.t, t.x1 + (y - t.y1) * (t.x2-t.x1
 ==(t1::AffineT, t2::AffineT) = _allfieldsequal(t1, t2) 
 
 write_dict(T::AffineT) = 
-      Dict("__id__" => "ACE_AffineT", 
+      Dict("__id__" => "ACE1_AffineT", 
            "t" => write_dict(T.t), 
            "xy" => [T.x1, T.x2, T.y1, T.y2] )
 
-read_dict(::Val{:ACE_AffineT}, D::Dict) = AffineT(D) 
+read_dict(::Val{:ACE1_AffineT}, D::Dict) = AffineT(D) 
 
 AffineT(D::Dict) = AffineT(read_dict(D["t"]), 
                          D["xy"]... )
@@ -269,11 +264,11 @@ cutoff_extrema(T::MultiTransform) =
 ==(T1::MultiTransform, T2::MultiTransform) =  _allfieldsequal(T1, T2)
 
 write_dict(T::MultiTransform) =
-      Dict("__id__" => "ACE_MultiTransform", 
+      Dict("__id__" => "ACE1_MultiTransform", 
            "zlist" => write_dict(T.zlist), 
            "transforms" => write_dict.(T.transforms[:]))
 
-read_dict(::Val{:ACE_MultiTransform}, D::Dict) = MultiTransform(D)
+read_dict(::Val{:ACE1_MultiTransform}, D::Dict) = MultiTransform(D)
 
 function MultiTransform(D::Dict) 
    zlist = read_dict(D["zlist"])

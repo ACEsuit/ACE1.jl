@@ -1,6 +1,6 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
@@ -21,7 +21,7 @@ using LinearAlgebra: norm, dot, mul!, I
 using StaticArrays
 
 # -----------------------------------------------------------------------------
-# JuLIP, ACE, etc : just use import throughout, this avoids bugs
+# JuLIP, ACE1, etc : just use import throughout, this avoids bugs
 
 import JuLIP
 

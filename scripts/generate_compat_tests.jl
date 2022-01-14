@@ -1,12 +1,12 @@
 
 # --------------------------------------------------------------------------
-# ACE.jl and SHIPs.jl: Julia implementation of the Atomic Cluster Expansion
+# ACE1.jl: Julia implementation of the Atomic Cluster Expansion
 # Copyright (c) 2019 Christoph Ortner <christophortner0@gmail.com>
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
 
-using JuLIP, ACE, ZipFile, JSON
+using JuLIP, ACE1, ZipFile, JSON
 
 #---
 
@@ -25,7 +25,7 @@ for species in species_list, N = 1:length(degrees)
    _params = Dict("species" => species, "maxdeg" => degrees[N], "wL" => wLs[N],
                   "r0" => r0, "rcut" => 2.5 * r0, "N" => N,
                   "degreetype" => "SparsePSHDegree")
-   basis = ACE.Testing.test_basis(_params)
+   basis = ACE1.Testing.test_basis(_params)
 
    # file label
    flabel = "_$(N)_" * prod(string.(species)) * ".json"
@@ -33,14 +33,14 @@ for species in species_list, N = 1:length(degrees)
    # write basis and basis tests
    D = write_dict(basis)
    D["_params"] = _params
-   D["_tests"] = ACE.Testing.createtests(basis, 3; tests = ["E"])
+   D["_tests"] = ACE1.Testing.createtests(basis, 3; tests = ["E"])
    fptr = ZipFile.addfile(zipdir, "rpibasis" * flabel; method = ZipFile.Deflate)
    write(fptr, JSON.json(D))
 
    # write potential and potential tests
-   V = ACE.Random.randcombine(basis; diff=1)
+   V = ACE1.Random.randcombine(basis; diff=1)
    D = write_dict(V)
-   D["_tests"] = ACE.Testing.createtests(V, 3)
+   D["_tests"] = ACE1.Testing.createtests(V, 3)
    fptr = ZipFile.addfile(zipdir, "rpipot" * flabel; method = ZipFile.Deflate)
    write(fptr, JSON.json(D))
 end
