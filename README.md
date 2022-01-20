@@ -7,7 +7,7 @@
 
 [![Codecov](https://codecov.io/gh/JuliaMolSim/ACE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaMolSim/ACE.jl) -->
 
-This package implements a flaviour of the *Atomic Cluster Expansion*; i.e., parameterisation schemes for permutation and isometry invariant functions, primarily for the purpose of modelling invariant atomic properties. It provides constructions of symmetric polynomial bases, imposing permutation and isometry invariance. Please see the [Documentation]() for installation, documentation and tutorials.
+This package implements a flaviour of the *Atomic Cluster Expansion*; i.e., parameterisation schemes for permutation and isometry invariant functions, primarily for the purpose of modelling invariant atomic properties. It provides constructions of symmetric polynomial bases, imposing permutation and isometry invariance. Please see the [Documentation](https://acesuit.github.io/ACE1docs.jl/) for installation, documentation and tutorials.
 
 
 ## References
