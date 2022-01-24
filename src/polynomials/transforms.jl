@@ -51,6 +51,8 @@ struct PolyTransform{TP, T} <: DistanceTransform
    r0::T
 end
 
+PolyTransform(; p = 2, r0 = 2.5) = PolyTransform(p, r0)
+
 write_dict(T::PolyTransform) =
    Dict("__id__" => "ACE1_PolyTransform", "p" => T.p, "r0" => T.r0)
 
