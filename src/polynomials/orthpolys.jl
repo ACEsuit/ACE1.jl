@@ -245,7 +245,7 @@ function TransformedPolys(J, trans, rl, ru)
    # get the combined type if rl, ru are different 
    T = promote_type(typeof(rl), typeof(ru))
    # integer is not allowed and we then default to float64 
-   if T <: Integer 
+   if !(T <: AbstractFloat)
       T = Float64 
    end 
    rl_ = convert(T, rl) 
