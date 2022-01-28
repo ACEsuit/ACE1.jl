@@ -250,7 +250,7 @@ function TransformedPolys(J, trans, rl, ru)
    end 
    rl_ = convert(T, rl) 
    ru_ = convert(T, ru)
-   TransformedPolys(J, trans, rl_, ru_)
+   return TransformedPolys(J, trans, rl_, ru_)
 end
 
 write_dict(J::TransformedPolys) = Dict(
