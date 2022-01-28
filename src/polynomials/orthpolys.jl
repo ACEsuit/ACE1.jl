@@ -241,8 +241,17 @@ end
    (J1.rl == J2.rl) &&
    (J1.ru == J2.ru) )
 
-TransformedPolys(J, trans, rl, ru) =
-   TransformedPolys(J, trans, rl, ru)
+function TransformedPolys(J, trans, rl, ru)
+   # get the combined type if rl, ru are different 
+   T = promote_type(typeof(rl), typeof(ru))
+   # integer is not allowed and we then default to float64 
+   if !(T <: AbstractFloat)
+      T = Float64 
+   end 
+   rl_ = convert(T, rl) 
+   ru_ = convert(T, ru)
+   return TransformedPolys(J, trans, rl_, ru_)
+end
 
 write_dict(J::TransformedPolys) = Dict(
       "__id__" => "ACE1_TransformedPolys",
