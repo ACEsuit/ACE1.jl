@@ -27,7 +27,7 @@ using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
     # ------------------------
     #   rotation_invariance
     # TODO: implement a check whether Sympy is available and run test conditionally 
-    # include("rpi/test_cg.jl")
+    include("rpi/test_cg.jl")
     include("rpi/test_rpibasis.jl")
 
     # ----------------------
