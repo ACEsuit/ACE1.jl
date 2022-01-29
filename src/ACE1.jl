@@ -59,6 +59,7 @@ include("utils/pure.jl")
 
 include("compat/compat.jl")
 
+include("fio.jl")
 
 include("export/export.jl")
 include("export/export_multispecies.jl")
