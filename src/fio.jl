@@ -38,6 +38,14 @@ function load_potential(fname::AbstractString; format = :auto)
    return read_dict(D)
 end
 
+"""
+`save_potential(fname::AbstractString, V; format = :auto)` : convenience
+function to save an ACE1 potential to disk. If `format == :auto` it tries to 
+guess the format from the ending of the filename. If this fails, then 
+one can try to pass the format explicitly as a kwarg, 
+* `format = :json` for a raw json file 
+* `format = :zip` for to write a compressed json file using `JuLIP.FIO.zip_dict`
+"""
 function save_potential(fname::AbstractString, V; format = :auto)
    if format == :auto 
       format = _auto_format(fname)
