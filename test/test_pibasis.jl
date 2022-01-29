@@ -8,15 +8,15 @@
 
 @testset "PIBasis"  begin
 
-#---
+##
 
 
 using ACE1, Random
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d
+using ACE1.Testing: println_slim 
 
-
-#---
+##
 
 @info("Basic test of PIBasis construction and evaluation")
 
@@ -49,7 +49,7 @@ println_slim(@test dAA ≈ dAAdag)
 
 println_slim(@test all(JuLIP.Testing.test_fio(dagbasis)))
 
-#--- check multi-species
+## check multi-species
 maxdeg = 5
 ord = 3
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
@@ -72,7 +72,13 @@ dAAdag = evaluate_d(dagbasis, Rs, Zs, z0)
 println_slim(@test dAA ≈ dAAdag)
 
 println(@test all(JuLIP.Testing.test_fio(dagbasis)))
-#---
+##
+
+@info("check SparseDegree alias")
+D_ = ACE1.SparseDegree() 
+println_slim(@test D == D_)
+
+##
 
 @info("Check several properties of PIBasis")
 for species in (:X, :Si, [:C, :O, :H]), N = 1:5
@@ -129,7 +135,7 @@ for species in (:X, :Si, [:C, :O, :H]), N = 1:5
 end
 println()
 
-#---
+##
 
 
 end

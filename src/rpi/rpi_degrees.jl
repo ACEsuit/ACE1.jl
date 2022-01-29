@@ -82,6 +82,8 @@ SparsePSHDegree(wL = 1.5, csp = 1.0, chc = 0.0, ahc = 0.0, bhc = 0.0)
    bhc::Float64  = 0.0
 end
 
+const SparseDegree = SparsePSHDegree
+export SparseDegree
 
 degree(d::SparsePSHDegree, phi::PSH1pBasisFcn, z0=nothing) =
       phi.n + d.wL * phi.l
