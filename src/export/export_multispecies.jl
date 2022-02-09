@@ -27,7 +27,7 @@ function export_ACE(fname, IP)
     data["deltaSplineBins"] = 0.001 #" none
 
     elements = Vector(undef, length(species))
-    E0 = zeros(3)
+    E0 = zeros(length(species))
     
     for (index, element) in species_dict
         E0[index+1] = V1(Symbol(element))
