@@ -8,7 +8,7 @@
 
 @testset "PIPotential"  begin
 
-#---
+##
 
 
 using ACE1, ACE1.Testing
@@ -16,7 +16,7 @@ using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing, Random
 using JuLIP: evaluate, evaluate_d, evaluate_ed
 using ACE1: combine
 
-#---
+##
 
 @info("Basic test of PIPotential construction and evaluation")
 maxdeg = 10
@@ -42,9 +42,26 @@ grad_V = evaluate_d(V, Rs, Zs, z0)
 println_slim(@test(grad_basis ≈ grad_V))
 println_slim(@test(evaluate_d(Vdag, Rs, Zs, z0) ≈ grad_V))
 
-println(@test(all(JuLIP.Testing.test_fio(V))))
 
-#---
+##
+
+@info("Test FIO")
+println_slim(@test(all(JuLIP.Testing.test_fio(V))))
+
+@info("Check FIO with `read_potential`")
+tmpf_json = tempname() * ".json"
+tmpf_zip = tempname() * ".zip"
+
+save_potential(tmpf_json, V)
+V_json = load_potential(tmpf_json)
+println_slim(@test V_json == V)
+
+save_potential(tmpf_zip, V)
+V_zip = load_potential(tmpf_zip)
+println_slim(@test V_zip == V)
+
+
+##
 
 # check multi-species
 maxdeg = 5
@@ -69,7 +86,8 @@ println_slim(@test(evaluate_d(Vdag, Rs, Zs, z0) ≈ grad_V))
 
 println(@test(all(JuLIP.Testing.test_fio(V))))
 
-#---
+
+##
 
 @info("Check several properties of PIPotential")
 for species in (:X, :Si, [:C, :O, :H]), N = 1:5
@@ -122,7 +140,7 @@ for species in (:X, :Si, [:C, :O, :H]), N = 1:5
 end
 println()
 
-#---
+##
 
 
 @info("Check Correctness of ACE1.PIPotential calculators")
@@ -156,6 +174,6 @@ for N = 1:5
 end
 
 
-#---
+##
 
 end
