@@ -58,6 +58,7 @@ include("utils.jl")
 
 include("compat/compat.jl")
 
+include("fio.jl")
 
 
 
