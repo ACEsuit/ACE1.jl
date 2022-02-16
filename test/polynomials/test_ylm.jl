@@ -73,7 +73,7 @@ for n = 1:nsamples
    print_tf((@test Y ≈ Yex || norm(Y - Yes, Inf) < 1e-12))
 end
 println()
-##
+## 
 
 verbose=false
 @info("Test: check derivatives of associated legendre polynomials")
@@ -134,6 +134,23 @@ for nsamples = 1:30
    print_tf((@test R ≈ spher2cart(cart2spher(R))))
 end
 println()
+
+
+##
+
+@info("    ... at the pole")
+r = SVector(0.0, 0.0, 0.0)
+s = cart2spher(r)
+println(@test(s.r == 0.0) )
+println(@test(spher2cart(s) == r))
+
+@info("Very large numbers")
+for ntest = 1:20
+   rr = 1e130 * rand(SVector{3, Float64})
+   s = cart2spher(rr)
+   print_tf(@test(abs(s.cosθ) <= 1))
+end
+
 
 ##
 
