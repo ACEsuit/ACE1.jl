@@ -22,8 +22,17 @@ Base.length(pB::PolyPairBasis{TJ, NZ}) where {TJ, NZ} =
       sum( length(pB.J[i,j]) for i = 1:NZ for j = i:NZ )
 
 # these make no sense - where are they used? 
-# Base.length(pB::PolyPairBasis, z0::AtomicNumber) = length(pB, z2i(pB, z0))
-# Base.length(pB::PolyPairBasis, iz0::Integer) = length(pB.J)
+Base.length(pB::PolyPairBasis, z::AtomicNumber, z0::AtomicNumber) = 
+         length(pB, z2i(pB, z), z2i(pB, z0))
+
+Base.length(pB::PolyPairBasis, iz::Integer, iz0::Integer) = 
+         length(pB.J[iz0, iz])
+
+_getJ(pB::PolyPairBasis, z::AtomicNumber, z0::AtomicNumber) = 
+         _getJ(pB, z2i(pB, z), z2i(pB, z0))
+
+_getJ(pB::PolyPairBasis, i::Integer, i0::Integer) = pB.J[i0, i]
+
 
 zlist(pB::PolyPairBasis) = pB.zlist
 
@@ -144,7 +153,7 @@ function virial(pB::PolyPairBasis, at::Atoms{T}) where {T}
       dJ = tmp.dJ[Ii, Ij]
       evaluate_d!(tmp.J[Ii, Ij], dJ, tmp.tmpd_J[Ii, Ij], pB.J[Ii, Ij], r, Zi, Zj)
       idx0 = _Bidx0(pB, Zi, Zj)
-      for n = 1:length(pB.J)
+      for n = 1:length(pB.J[Ii, Ij])
          V[idx0 + n] -= 0.5 * (dJ[n]/r) * R * R'
       end
    end

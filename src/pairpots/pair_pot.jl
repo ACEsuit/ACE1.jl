@@ -57,14 +57,23 @@ alloc_temp_d(V::PolyPairPot{T}, N::Integer) where {T} =
 
 function _dot_zij(V, B, z, z0)
    i0 = _Bidx0(V.basis, z, z0)  # cf. pair_basis.jl
-   return sum( V.coeffs[i0 + n] * B[n]  for n = 1:length(V.basis, z0) )
+   return sum( V.coeffs[i0 + n] * B[n]  for n = 1:length(V.basis, z, z0) )
 end
 
-evaluate!(tmp, V::PolyPairPot, r::Number, z, z0) =
-      _dot_zij(V, evaluate!(tmp.J, tmp.tmp_J, V.basis.J, r, z, z0), z, z0)
+function evaluate!(tmp, V::PolyPairPot, r::Number, z, z0) 
+      Iz = z2i(V, z)
+      Iz0 = z2i(V, z0)
+      evaluate!(tmp.J[Iz, Iz0], tmp.tmp_J[Iz, Iz0], V.basis.J[Iz, Iz0], r, z, z0)
+      return _dot_zij(V, tmp.J[Iz, Iz0], z, z0)
+end
 
-evaluate_d!(tmp, V::PolyPairPot, r::Number, z, z0) =
-      _dot_zij(V, evaluate_d!(tmp.J, tmp.dJ, tmp.tmpd_J, V.basis.J, r, z, z0), z, z0)
+function evaluate_d!(tmp, V::PolyPairPot, r::Number, z, z0) 
+      Iz = z2i(V, z)
+      Iz0 = z2i(V, z0)
+      evaluate_d!(tmp.J[Iz, Iz0], tmp.dJ[Iz, Iz0], tmp.tmpd_J[Iz, Iz0], 
+                  V.basis.J[Iz, Iz0], r, z, z0)
+      return _dot_zij(V, tmp.dJ[Iz, Iz0], z, z0)
+end
 
 function evaluate!(tmp, V::PolyPairPot, r::Number)
    @assert numz(V) == 1
