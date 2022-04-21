@@ -8,10 +8,15 @@ using ACE1: rand_radial, cutoff, numz, ZList
 using JuLIP: energy, bulk, i2z, z2i, chemical_symbol
 
 function export_ACE(fname, IP, export_pairpot_as_table=false)
+    # supply fname with the .yace extension
+
     #decomposing into V1, V2, V3 (One body, two body and ACE bases)
     V1 = IP.components[1]
     V2 = IP.components[2]
     V3 = IP.components[3]
+
+    # require 3 components of IP for now, and assume that are 1B, 2B, ACE
+    @assert length(IP.components) == 3
 
     if hasproperty(V2, :basis)
         species = collect(string.(chemical_symbol.(V2.basis.zlist.list.data)))
@@ -36,19 +41,30 @@ function export_ACE(fname, IP, export_pairpot_as_table=false)
 
     # grabbing the elements key and E0 key from the onebody (V1)
     data["elements"] = elements
+
+    # 1body
     data["E0"] = E0
 
-    if hasproperty(V2, :basis)
-        polypairpot = export_polypairpot(V2, reversed_species_dict)
-    else hasproperty(V2, :Vin)
-        polypairpot = export_polypairpot(V2.Vout, reversed_species_dict)
-        reppot = export_reppot(V2, reversed_species_dict)
-        data["reppot"] = reppot
+    # 2body
+    if export_pairpot_as_table
+        # I am not handling the hasproperty(V2, :Vin) case, since I don't know what this is
+        
+        # this writes a .tabe file, so for simplicity require that export fname is passed with
+        # .yace extension, and we remove this and add the .table extension instead
+        fname_stem = fname[end-5:end]
+        write_pairpot_table(fname_stem, V2, reversed_species_dict)
+    else
+        if hasproperty(V2, :basis)
+            polypairpot = export_polypairpot(V2, reversed_species_dict)
+        else hasproperty(V2, :Vin)
+            polypairpot = export_polypairpot(V2.Vout, reversed_species_dict)
+            reppot = export_reppot(V2, reversed_species_dict)
+            data["reppot"] = reppot
+        end
+        data["polypairpot"] = polypairpot
     end
 
-    data["polypairpot"] = polypairpot
-    #creating "data" dict where we'll store everything
-
+    # ACE
     embeddings, bonds = export_radial_basis(V3, species_dict)
     data["embeddings"] = embeddings
     data["bonds"] = bonds
@@ -137,10 +153,7 @@ function write_pairpot_table(fname, V2, reversed_species_dict)
     # the file has a seperate section for each species pair interaction
     # format of table pair_style is described at https://docs.lammps.org/pair_table.html
 
-    # Create filename. Only the stem is specified.
-    if fname[1:end-5] == ".yace"
-        @error "file extension should not have been passed to write_pairpot_table()"
-    end
+    # Create filename. Only the stem is specified
     fname = fname * "_pairpot.table"
 
     # enumerate sections
