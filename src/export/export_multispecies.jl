@@ -7,7 +7,7 @@ using ACE1.OrthPolys: TransformedPolys
 using ACE1: rand_radial, cutoff, numz, ZList
 using JuLIP: energy, bulk, i2z, z2i, chemical_symbol
 
-function export_ACE(fname, IP)
+function export_ACE(fname, IP, export_pairpot_as_table=false)
     #decomposing into V1, V2, V3 (One body, two body and ACE bases)
     V1 = IP.components[1]
     V2 = IP.components[2]
@@ -121,6 +121,76 @@ function export_polypairpot(V2, reversed_species_dict)
     end
     
     return polypairpot
+end
+
+
+make_dimer(s1, s2, rr) = Atoms(
+    [[0.0,0.0,0.0],[rr,0.0,0.0]], 
+    [[0.0,0.0,0.0],[0.0,0.0,0.0]],
+    [atomic_mass(s1), atomic_mass(s2)],
+    [AtomicNumber(s1), AtomicNumber(s2)],
+    [100.0,100.0,100.0],
+    [false, false, false])
+
+function write_pairpot_table(fname, V2, reversed_species_dict)
+    # write a pair_style table file for LAMMPS
+    # the file has a seperate section for each species pair interaction
+    # format of table pair_style is described at https://docs.lammps.org/pair_table.html
+
+    # Create filename. Only the stem is specified.
+    if fname[1:end-5] == ".yace"
+        @error "file extension should not have been passed to write_pairpot_table()"
+    end
+    fname = fname * "_pairpot.table"
+
+    # enumerate sections
+    species_pairs = []
+    for i in 0:length(reversed_species_dict)
+        for j in 0:i
+            push!(species_pairs, (reversed_species_dict[i], reversed_species_dict[j]))
+        end
+    end
+
+    lines = Vector{String}()
+
+    # make header
+    push!(lines, "# DATE: ??? UNITS: metal CONTRIBUTOR: ACE1.jl - https://github.com/ACEsuit/ACE1.jl")
+    push!(lines, "# ACE1 pair potential")
+    push!(lines, "")
+
+    for spec_pair in species_pairs
+        # make dimer
+        dimer = make_dimer(spec_pair[1], spec_pair[2], 1.0)
+
+        # get inner and outer cutoffs
+        rin = 0.1
+        rout = 10.0
+        spacing = 0.1
+        rs = rin:spacing:rout
+
+        # section header
+        push!(lines, string(spec_pair[1], "_", spec_pair[2]))
+        push!(lines, string("N ", length(rs)))
+        push!(lines, "")
+        
+        # values
+        for (index, R) in enumerate(rs)
+            dimer.X[2][1] = R
+            E = energy(V2, dimer)
+            F = forces(V2, dimer)[1][1]
+            push!(lines, string(index, " ", R, " ", E, " ", F))
+        end
+        push!(lines, "")
+    end
+
+    # write
+    open(fname, "w+") do io
+        for line in lines
+            write(io, line * "\n")
+        end
+    end
+
+    return nothing
 end
 
 function export_radial_basis(V3, species_dict)
