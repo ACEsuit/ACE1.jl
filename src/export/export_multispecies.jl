@@ -52,7 +52,7 @@ function export_ACE(fname, IP; export_pairpot_as_table=false)
         # this writes a .tabe file, so for simplicity require that export fname is passed with
         # .yace extension, and we remove this and add the .table extension instead
         fname_stem = fname[end-5:end]
-        write_pairpot_table(fname_stem, V2, reversed_species_dict)
+        write_pairpot_table(fname_stem, V2, species_dict)
     else
         if hasproperty(V2, :basis)
             polypairpot = export_polypairpot(V2, reversed_species_dict)
@@ -148,7 +148,7 @@ make_dimer(s1, s2, rr) = Atoms(
     [100.0,100.0,100.0],
     [false, false, false])
 
-function write_pairpot_table(fname, V2, reversed_species_dict)
+function write_pairpot_table(fname, V2, species_dict)
     # write a pair_style table file for LAMMPS
     # the file has a seperate section for each species pair interaction
     # format of table pair_style is described at https://docs.lammps.org/pair_table.html
@@ -158,27 +158,27 @@ function write_pairpot_table(fname, V2, reversed_species_dict)
 
     # enumerate sections
     species_pairs = []
-    for i in 1:length(reversed_species_dict)
-        for j in 1:i
-            push!(species_pairs, (reversed_species_dict[i], reversed_species_dict[j]))
+    for i in 0:length(species_dict) - 1
+        for j in 0:i
+            push!(species_pairs, (species_dict[i], species_dict[j]))
         end
     end
 
     lines = Vector{String}()
 
     # make header
-    push!(lines, "# DATE: ??? UNITS: metal CONTRIBUTOR: ACE1.jl - https://github.com/ACEsuit/ACE1.jl")
+    push!(lines, "# DATE: none UNITS: metal CONTRIBUTOR: ACE1.jl - https://github.com/ACEsuit/ACE1.jl")
     push!(lines, "# ACE1 pair potential")
     push!(lines, "")
 
     for spec_pair in species_pairs
         # make dimer
-        dimer = make_dimer(spec_pair[1], spec_pair[2], 1.0)
+        dimer = make_dimer(Symbol(spec_pair[1]), Symbol(spec_pair[2]), 1.0)
 
         # get inner and outer cutoffs
         rin = 0.1
-        rout = 10.0
-        spacing = 0.1
+        rout = V2.basis.J.ru
+        spacing = 0.001
         rs = rin:spacing:rout
 
         # section header
@@ -188,7 +188,7 @@ function write_pairpot_table(fname, V2, reversed_species_dict)
         
         # values
         for (index, R) in enumerate(rs)
-            dimer.X[2][1] = R
+            set_positions!(dimer, AbstractVector{JVec{Float64}}([[R,0.0,0.0], [0.0,0.0,0.0]]))
             E = energy(V2, dimer)
             F = forces(V2, dimer)[1][1]
             push!(lines, string(index, " ", R, " ", E, " ", F))
