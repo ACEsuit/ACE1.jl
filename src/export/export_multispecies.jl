@@ -158,8 +158,8 @@ function write_pairpot_table(fname, V2, reversed_species_dict)
 
     # enumerate sections
     species_pairs = []
-    for i in 0:length(reversed_species_dict)
-        for j in 0:i
+    for i in 1:length(reversed_species_dict)
+        for j in 1:i
             push!(species_pairs, (reversed_species_dict[i], reversed_species_dict[j]))
         end
     end
