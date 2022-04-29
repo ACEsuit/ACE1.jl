@@ -51,7 +51,7 @@ function export_ACE(fname, IP; export_pairpot_as_table=false)
         
         # this writes a .tabe file, so for simplicity require that export fname is passed with
         # .yace extension, and we remove this and add the .table extension instead
-        fname_stem = fname[end-5:end]
+        fname_stem = fname[1:end-5]
         write_pairpot_table(fname_stem, V2, species_dict)
     else
         if hasproperty(V2, :basis)
@@ -159,7 +159,7 @@ function write_pairpot_table(fname, V2, species_dict)
     # enumerate sections
     species_pairs = []
     for i in 0:length(species_dict) - 1
-        for j in 0:i
+        for j in i:length(species_dict) - 1
             push!(species_pairs, (species_dict[i], species_dict[j]))
         end
     end
