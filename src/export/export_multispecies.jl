@@ -17,13 +17,7 @@ function export_ACE(fname, IP; export_pairpot_as_table=false)
 
     # require 3 components of IP for now, and assume that are 1B, 2B, ACE
     @assert length(IP.components) == 3
-
-    if hasproperty(V2, :basis)
-        species = collect(string.(chemical_symbol.(V2.basis.zlist.list.data)))
-    else hasproperty(V2, :Vout)
-        species = collect(string.(chemical_symbol.(V2.Vout.basis.zlist.list.data)))
-    end
-
+    species = collect(string.(chemical_symbol.(IP.components[3].pibasis.zlist.list)))
     species_dict = Dict(zip(collect(0:length(species)-1), species))
     reversed_species_dict = Dict(zip(species, collect(0:length(species)-1)))
 
