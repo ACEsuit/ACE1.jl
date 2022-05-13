@@ -5,7 +5,7 @@ using ACE1
 using ACE1: PIBasis, PIBasisFcn, PIPotential
 using ACE1.OrthPolys: TransformedPolys
 using ACE1: rand_radial, cutoff, numz, ZList
-using JuLIP: energy, bulk, i2z, z2i, chemical_symbol
+using JuLIP: energy, bulk, i2z, z2i, chemical_symbol, SMatrix
 
 function export_ACE(fname, IP; export_pairpot_as_table=false)
     # supply fname with the .yace extension
@@ -170,8 +170,16 @@ function write_pairpot_table(fname, V2, species_dict)
         dimer = make_dimer(Symbol(spec_pair[1]), Symbol(spec_pair[2]), 1.0)
 
         # get inner and outer cutoffs
+
+        if typeof(V2.basis.J) <: SMatrix
+            get_ru(jj) = jj.ru
+            rus = get_ru.(V2.basis.J)
+            rout = maximum(rus)    
+        else
+            rout = V2.basis.J.ru
+        end
+
         rin = 0.1
-        rout = V2.basis.J.ru
         spacing = 0.001
         rs = rin:spacing:rout
 
