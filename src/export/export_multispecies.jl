@@ -9,6 +9,8 @@ using JuLIP: energy, bulk, i2z, z2i, chemical_symbol, SMatrix
 
 function export_ACE(fname, IP; export_pairpot_as_table=false)
     # supply fname with the .yace extension
+    # if export_pairpot_as_table, don't write the pairpot and make .table file instead.
+    # TODO: document usage of the .table file for the pairpot
 
     #decomposing into V1, V2, V3 (One body, two body and ACE bases)
     V1 = IP.components[1]
@@ -43,7 +45,7 @@ function export_ACE(fname, IP; export_pairpot_as_table=false)
     if export_pairpot_as_table
         # I am not handling the hasproperty(V2, :Vin) case, since I don't know what this is
         
-        # this writes a .tabe file, so for simplicity require that export fname is passed with
+        # this writes a .table file, so for simplicity require that export fname is passed with
         # .yace extension, and we remove this and add the .table extension instead
         fname_stem = fname[1:end-5]
         write_pairpot_table(fname_stem, V2, species_dict)
@@ -143,6 +145,7 @@ make_dimer(s1, s2, rr) = Atoms(
     [false, false, false])
 
 function write_pairpot_table(fname, V2, species_dict)
+    # fname is JUST THE STEM
     # write a pair_style table file for LAMMPS
     # the file has a seperate section for each species pair interaction
     # format of table pair_style is described at https://docs.lammps.org/pair_table.html
@@ -160,7 +163,7 @@ function write_pairpot_table(fname, V2, species_dict)
 
     lines = Vector{String}()
 
-    # make header
+    # make header. date is none since ACE1 current doesnt depend on time/dates package
     push!(lines, "# DATE: none UNITS: metal CONTRIBUTOR: ACE1.jl - https://github.com/ACEsuit/ACE1.jl")
     push!(lines, "# ACE1 pair potential")
     push!(lines, "")
@@ -224,7 +227,7 @@ function export_radial_basis(V3, species_dict)
     maxn = length(V3.pibasis.basis1p.J.J.A)
 
     #guessing "radbasname" is that just "polypairpots"
-    radbasename = "ACE1.jl.base"
+    radbasename = "ACE.jl.base"
 
     embeddings = Dict()
 
