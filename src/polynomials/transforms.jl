@@ -25,46 +25,51 @@ inv_transform(t::DistanceTransform, x::Number, z::AtomicNumber, z0::AtomicNumber
 
 
 
-poly_trans(p, r0, r) = @fastmath(((1+r0)/(1+r))^p)
+poly_trans(p, r0, a, r) = 
+         @fastmath(((a+r0)/(a+r))^p)
 
-poly_trans_d(p, r0, r) = @fastmath((-p/(1+r0)) * ((1+r0)/(1+r))^(p+1))
+poly_trans_d(p, r0, a, r) = 
+         @fastmath((-p/(a+r0)) * ((a+r0)/(a+r))^(p+1))
 
-poly_trans_inv(p, r0, x) = ( (1+r0)/(x^(1/p)) - 1 )
+poly_trans_inv(p, r0, a, x) = 
+         ( (a+r0)/(x^(1/p)) - a )
 
-
-# TODO: generalise the distance transform to allow
-#       ((a + r0) / (a + r) )^p
 
 @doc raw"""
 Implements the distance transform
 ```math
-   x(r) = \Big(\frac{1 + r_0}{1 + r}\Big)^p
+   x(r) = \Big(\frac{\varepsilon + r_0}{\varepsilon + r}\Big)^p
 ```
 
 Constructor:
 ```
-PolyTransform(p, r0)
+PolyTransform(; p = 2, r0 = 2.5, a = 1.0)
+PolyTransform(p, r0, a)
 ```
 """
 struct PolyTransform{TP, T} <: DistanceTransform
    p::TP
    r0::T
+   a::T 
 end
 
-PolyTransform(; p = 2, r0 = 2.5) = PolyTransform(p, r0)
+PolyTransform(; p = 2, r0 = 2.5, a = 1.0) = PolyTransform(p, r0, a)
 
 write_dict(T::PolyTransform) =
-   Dict("__id__" => "ACE1_PolyTransform", "p" => T.p, "r0" => T.r0)
+   Dict("__id__" => "ACE1_PolyTransform", 
+             "p" => T.p, 
+            "r0" => T.r0, 
+          "a" => T.a)
 
-PolyTransform(D::Dict) = PolyTransform(D["p"], D["r0"])
+PolyTransform(D::Dict) = PolyTransform(D["p"], D["r0"], D["a"])
 
 read_dict(::Val{:ACE1_PolyTransform}, D::Dict) = PolyTransform(D)
 
-transform(t::PolyTransform, r::Number) = poly_trans(t.p, t.r0, r)
+transform(t::PolyTransform, r::Number) = poly_trans(t.p, t.r0, t.a, r)
 
-transform_d(t::PolyTransform, r::Number) = poly_trans_d(t.p, t.r0, r)
+transform_d(t::PolyTransform, r::Number) = poly_trans_d(t.p, t.r0, t.a, r)
 
-inv_transform(t::PolyTransform, x::Number) = poly_trans_inv(t.p, t.r0, x)
+inv_transform(t::PolyTransform, x::Number) = poly_trans_inv(t.p, t.r0, t.a, x)
 
 (t::PolyTransform)(x) = transform(t, x)
 
