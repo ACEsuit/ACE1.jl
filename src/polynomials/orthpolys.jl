@@ -211,7 +211,7 @@ function evaluate_ed!(P, dP, tmp, J::OrthPolyBasis, t; maxn=length(J))
 end
 
 evaluate_d!(P, dP, tmp, J::OrthPolyBasis, t; maxn=length(J)) = 
-         evaluate_ed!(P, dP, tmp, J, t, maxn)[2]
+         evaluate_ed!(P, dP, tmp, J, t; maxn=maxn)[2]
 
 """
 `discrete_jacobi(N; pcut=0, tcut=1.0, pin=0, tin=-1.0, Nquad = 1000)`
@@ -311,7 +311,8 @@ function evaluate_d!(P, dP, tmp, J::TransformedPolys, r, args...; maxn=length(J)
    evaluate_ed!(P, dP, nothing, J.J, t, maxn=maxn)
    e = evaluate(J.envelope, J.trans, r)
    de = evaluate_d(J.envelope, J.trans, r)
-   @. dP = de * P + e * dP
+   @. dP = de * P + e * dP * dt 
+   # dP[:] .= de * P + e * dP * dt
    return dP
 end
 
@@ -391,6 +392,12 @@ end
 
 evaluate(env::OneEnvelope, r::T) where {T <: Real} = one(T)
 
+write_dict(env::OneEnvelope) = Dict(
+      "__id__" => "ACE1_OneEnvelope",
+   )
+
+read_dict(::Val{:ACE1_OneEnvelope}, D::Dict) = OneEnvelope()
+
 
 struct PolyEnvelope{T} <: AbstractEnvelopeR
    p::Int
@@ -402,6 +409,18 @@ function evaluate(env::PolyEnvelope, r::T) where {T <: Real}
    p, r0, rcut = env.p, env.r0, env.rcut
    s = r/r0; scut = rcut/r0 
    return s^(-p) - scut^(-p) + p * scut^(-p-1) * (s - scut)
+end
+
+write_dict(env::PolyEnvelope{T}) where {T} = Dict(
+      "__id__" => "ACE1_PolyEnvelope",
+      "T" => write_dict(T), 
+      "p" => env.p,
+      "r0" => env.r0,
+      "rcut" => env.rcut, )
+
+function read_dict(::Val{:ACE1_PolyEnvelope}, D::Dict) 
+   T = read_dict(D["T"])
+   return PolyEnvelope(Int(D["p"]), T(D["r0"]), T(D["rcut"]), )
 end
 
 
@@ -419,6 +438,18 @@ function evaluate(env::TwoSidedEnvelope, x)
    return  (x - env.xl)^(env.pl) * (x - env.xr)^(env.pr)
 end
 
+write_dict(env::TwoSidedEnvelope{T}) where {T} = Dict(
+      "__id__" => "ACE1_TwoSidedEnvelope",
+      "T" => write_dict(T),
+      "xl" => env.xl,
+      "xr" => env.xr,
+      "pl" => env.pl,
+      "pr" => env.pr, )
+
+function read_dict(::Val{:ACE1_TwoSidedEnvelope}, D::Dict) 
+   T = read_dict(D["T"])
+   return TwoSidedEnvelope(T(D["xl"]), T(D["xr"]), Int(D["pl"]), Int(D["pr"]))
+end
 
 # -------------------- utility function to construct radial basis with envelope 
 

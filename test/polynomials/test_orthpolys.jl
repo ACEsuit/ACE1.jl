@@ -6,8 +6,6 @@
 # --------------------------------------------------------------------------
 
 
-@testset "OrthogonalPolynomials" begin
-
 @info("--------- Testing OrthogonalPolynomials ----------")
 
 ##
@@ -83,6 +81,7 @@ Pnew = ACE1.OrthPolys.transformed_jacobi(10, trans, 2.0, 0.5; pcut = 2, pin = 2)
 
 @info("   ... consistency of derivatives")
 for ntest = 1:30
+   local r 
    r = 2*rand() + 0.25
    dp = evaluate_d(Pnew, r)
    if r <= 0.5 || r >= 2.0
@@ -129,7 +128,6 @@ println()
 
 ##
 
-end
 
 # ## Quick look at the basis
 # using Plots
