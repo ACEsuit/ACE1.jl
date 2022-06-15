@@ -5,9 +5,6 @@
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
-
-@testset "1-Particle Basis"  begin
-
 ##
 
 using ACE1, ACE1.Testing 
@@ -34,6 +31,7 @@ evaluate_d(P1, Rs[1], Zs[1], z0)
 ##
 
 for species in (:X, :Si, [:C, :O, :H])
+   local Nat, P1, Rs, Zs, z0, h 
    @info("species = $species")
    Nat = 15
    P1 = ACE1.BasicPSH1pBasis(Pr; species = species)
@@ -80,5 +78,3 @@ end
 
 
 ##
-
-end

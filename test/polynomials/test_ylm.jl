@@ -6,8 +6,6 @@
 # --------------------------------------------------------------------------
 
 
-@testset "Ylm" begin
-
 ##
 import ACE1
 using JuLIP.Testing
@@ -45,6 +43,7 @@ end
 @info("Test: check complex spherical harmonics against explicit expressions")
 nsamples = 30
 for n = 1:nsamples
+   local r
    θ = rand() * π
    φ = (rand()-0.5) * 2*π
    r = 0.1+rand()
@@ -60,6 +59,7 @@ println()
 @info("      ... same near pole")
 nsamples = 30
 for n = 1:nsamples
+   local r 
    θ = rand() * 1e-9
    if θ < 1e-10
       θ = 0.0
@@ -78,6 +78,7 @@ println()
 verbose=false
 @info("Test: check derivatives of associated legendre polynomials")
 for nsamples = 1:30
+   local h 
    θ = 0.1+0.4 * pi * rand()
    L = 5
    P = ACE1.SphericalHarmonics.compute_p(L, θ)
@@ -109,6 +110,7 @@ println()
 
 @info("      ... same near pole")
 for nsamples = 1:30
+   local h 
    θ = rand() * 1e-8
    L = 5
    P = ACE1.SphericalHarmonics.compute_p(L, θ)
@@ -146,11 +148,12 @@ println(@test(spher2cart(s) == r))
 
 @info("Very large numbers")
 for ntest = 1:20
+   local s 
    rr = 1e130 * rand(SVector{3, Float64})
    s = cart2spher(rr)
    print_tf(@test(abs(s.cosθ) <= 1))
 end
-
+println() 
 
 ##
 
@@ -174,6 +177,7 @@ println()
 
 @info("Test: check derivatives of complex spherical harmonics")
 for nsamples = 1:30
+   local h 
    R = @SVector rand(3)
    SH = SHBasis(5)
    Y, dY = evaluate_ed(SH, R)
@@ -216,5 +220,3 @@ println()
 # end
 
 ##
-
-end # @testset
