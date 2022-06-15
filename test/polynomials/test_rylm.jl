@@ -6,7 +6,6 @@
 # --------------------------------------------------------------------------
 
 
-@testset "Real  Ylm" begin
 
 ##
 import ACE1
@@ -64,6 +63,7 @@ for nsamples = 1:30
    errs = []
    verbose && @printf("     h    | error \n")
    for p = 2:10
+      local h 
       h = 0.1^p
       DYh = similar(DY)
       Rh = Vector(R)
@@ -80,5 +80,3 @@ for nsamples = 1:30
 end
 println()
 
-
-end
