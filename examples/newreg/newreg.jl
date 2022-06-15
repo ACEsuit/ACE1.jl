@@ -88,3 +88,5 @@ plot(plt, plt1, histogram(rdf, nbins=30, xlims = [0.1, rcut], label = "rdf", leg
 
 ##
 
+using ACE1pack
+tial_set = ACE1pack.artifact("Ti
