@@ -47,11 +47,12 @@ spher2cart(S::PseudoSpherical) = S.r * JVec(S.cosφ*S.sinθ, S.sinφ*S.sinθ, S.
 
 function cart2spher(R::AbstractVector)
 	@assert length(R) == 3
-	r = norm(R)
+	r = norm(R) 
+	r_ = r + eps(r)   # this is maybe not good, the code is no longer scale-invariant!!! 
 	φ = atan(R[2], R[1])
 	sinφ, cosφ = sincos(φ)
-	cosθ = R[3] / r
-	sinθ = sqrt(R[1]^2+R[2]^2) / r
+	cosθ = R[3] / r_
+	sinθ = sqrt(R[1]^2+R[2]^2) / r_
 	return PseudoSpherical(r, cosφ, sinφ, cosθ, sinθ)
 end
 
