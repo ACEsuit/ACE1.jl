@@ -22,7 +22,7 @@ using ACE1.Transforms: DistanceTransform, transform, transform_d,
 
 import Base: ==
 
-export transformed_jacobi
+export transformed_jacobi, transformed_jacobi_env, PolyEnvelope, TwoSidedEnvelope
 
 # this is a hack to prevent a weird compiler error that I don't understand
 # at all yet
@@ -190,7 +190,7 @@ function evaluate!(P, tmp, J::OrthPolyBasis, t; maxn=length(J))
    return P
 end
 
-function evaluate_d!(P, dP, tmp, J::OrthPolyBasis, t; maxn=length(J))
+function evaluate_ed!(P, dP, tmp, J::OrthPolyBasis, t; maxn=length(J))
    @assert maxn <= min(length(P), length(dP))
 
    P[1] = J.A[1] * _fcut_(J.pl, J.tl, J.pr, J.tr, t)
@@ -207,8 +207,11 @@ function evaluate_d!(P, dP, tmp, J::OrthPolyBasis, t; maxn=length(J))
       P[n] = α * P[n-1] + J.C[n] * P[n-2]
       dP[n] = α * dP[n-1] + J.C[n] * dP[n-2] + J.A[n] * P[n-1]
    end
-   return dP
+   return P, dP
 end
+
+evaluate_d!(P, dP, tmp, J::OrthPolyBasis, t; maxn=length(J)) = 
+         evaluate_ed!(P, dP, tmp, J, t; maxn=maxn)[2]
 
 """
 `discrete_jacobi(N; pcut=0, tcut=1.0, pin=0, tin=-1.0, Nquad = 1000)`
@@ -227,21 +230,22 @@ end
 #   Transformed Polynomials Basis
 # ----------------------------------------------------------------
 
-
-struct TransformedPolys{T, TT, TJ} <: ACE1.ScalarBasis{T}
+struct TransformedPolys{T, TT, TJ, TENV} <: ACE1.ScalarBasis{T}
    J::TJ          # the actual basis
    trans::TT      # coordinate transform
    rl::T          # lower bound r
    ru::T          # upper bound r = rcut
+   envelope::TENV
 end
 
 ==(J1::TransformedPolys, J2::TransformedPolys) = (
    (J1.J == J2.J) &&
    (J1.trans == J2.trans) &&
    (J1.rl == J2.rl) &&
-   (J1.ru == J2.ru) )
+   (J1.ru == J2.ru) && 
+   (J1.envelope == J2.envelope) )
 
-function TransformedPolys(J, trans, rl, ru)
+function TransformedPolys(J, trans, rl, ru, env = OneEnvelope())
    # get the combined type if rl, ru are different 
    T = promote_type(typeof(rl), typeof(ru))
    # integer is not allowed and we then default to float64 
@@ -250,7 +254,7 @@ function TransformedPolys(J, trans, rl, ru)
    end 
    rl_ = convert(T, rl) 
    ru_ = convert(T, ru)
-   return TransformedPolys(J, trans, rl_, ru_)
+   return TransformedPolys(J, trans, rl_, ru_, env)
 end
 
 write_dict(J::TransformedPolys) = Dict(
@@ -258,7 +262,8 @@ write_dict(J::TransformedPolys) = Dict(
       "J" => write_dict(J.J),
       "rl" => J.rl,
       "ru" => J.ru,
-      "trans" => write_dict(J.trans)
+      "trans" => write_dict(J.trans), 
+      "envelope" => write_dict(J.envelope),
    )
 
 TransformedPolys(D::Dict) =
@@ -266,7 +271,8 @@ TransformedPolys(D::Dict) =
       read_dict(D["J"]),
       read_dict(D["trans"]),
       D["rl"],
-      D["ru"]
+      D["ru"],
+      read_dict(D["envelope"]), 
    )
 
 read_dict(::Val{:ACE1_TransformedPolys}, D::Dict) = TransformedPolys(D)
@@ -292,6 +298,8 @@ function evaluate!(P, tmp, J::TransformedPolys, r, args...; maxn=length(J))
    t = transform(J.trans, r, args...)
    # evaluate the actual polynomials
    evaluate!(P, nothing, J.J, t; maxn=maxn)
+   e = evaluate(J.envelope, r)
+   @. P *= e
    return P
 end
 
@@ -300,8 +308,11 @@ function evaluate_d!(P, dP, tmp, J::TransformedPolys, r, args...; maxn=length(J)
    t = transform(J.trans, r, args...)
    dt = transform_d(J.trans, r, args...)
    # evaluate the actual Jacobi polynomials + derivatives w.r.t. x
-   evaluate_d!(P, dP, nothing, J.J, t, maxn=maxn)
-   @. dP *= dt
+   evaluate_ed!(P, dP, nothing, J.J, t, maxn=maxn)
+   e = evaluate(J.envelope, J.trans, r)
+   de = evaluate_d(J.envelope, J.trans, r)
+   @. dP = de * P + e * dP * dt 
+   # dP[:] .= de * P + e * dP * dt
    return dP
 end
 
@@ -350,6 +361,118 @@ function transformed_jacobi(maxdeg::Integer,
    return TransformedPolys(J, trans, rin, rcut)
 end
 
+
+
+# -------------------- Envelopes 
+
+import ACE1: evaluate, evaluate_d
+import ForwardDiff
+
+abstract type AbstractEnvelope end 
+
+abstract type AbstractEnvelopeX <: AbstractEnvelope end 
+
+abstract type AbstractEnvelopeR <: AbstractEnvelope end 
+
+evaluate(env::AbstractEnvelopeR, trans, r::Real) = evaluate(env, r) 
+
+evaluate_d(env::AbstractEnvelopeR, trans, r::Real) = evaluate_d(env, r) 
+
+evaluate(env::AbstractEnvelopeX, trans, r::Real) = 
+      evaluate(env, transform(trans, r)) 
+
+evaluate_d(env::AbstractEnvelopeX, trans, r::Real) = 
+      evaluate_d(env, transform(trans, r)) * transform_d(trans, r)
+
+evaluate_d(env::AbstractEnvelope, r::Real) = 
+      ForwardDiff.derivative( r1 -> evaluate(env, r1), r )
+
+struct OneEnvelope <: AbstractEnvelopeR
+end
+
+evaluate(env::OneEnvelope, r::T) where {T <: Real} = one(T)
+
+write_dict(env::OneEnvelope) = Dict(
+      "__id__" => "ACE1_OneEnvelope",
+   )
+
+read_dict(::Val{:ACE1_OneEnvelope}, D::Dict) = OneEnvelope()
+
+
+struct PolyEnvelope{T} <: AbstractEnvelopeR
+   p::Int
+   r0::T 
+   rcut::T
+end
+
+function evaluate(env::PolyEnvelope, r::T) where {T <: Real}
+   p, r0, rcut = env.p, env.r0, env.rcut
+   s = r/r0; scut = rcut/r0 
+   return s^(-p) - scut^(-p) + p * scut^(-p-1) * (s - scut)
+end
+
+write_dict(env::PolyEnvelope{T}) where {T} = Dict(
+      "__id__" => "ACE1_PolyEnvelope",
+      "T" => write_dict(T), 
+      "p" => env.p,
+      "r0" => env.r0,
+      "rcut" => env.rcut, )
+
+function read_dict(::Val{:ACE1_PolyEnvelope}, D::Dict) 
+   T = read_dict(D["T"])
+   return PolyEnvelope(Int(D["p"]), T(D["r0"]), T(D["rcut"]), )
+end
+
+
+struct TwoSidedEnvelope{T} <: AbstractEnvelopeX
+   xl::T 
+   xr::T 
+   pl::Int 
+   pr::Int
+end
+
+function evaluate(env::TwoSidedEnvelope, x)
+   if x <= min(env.xl, env.xr) || x >= max(env.xl, env.xr) 
+      return 0.0
+   end
+   return  (x - env.xl)^(env.pl) * (x - env.xr)^(env.pr)
+end
+
+write_dict(env::TwoSidedEnvelope{T}) where {T} = Dict(
+      "__id__" => "ACE1_TwoSidedEnvelope",
+      "T" => write_dict(T),
+      "xl" => env.xl,
+      "xr" => env.xr,
+      "pl" => env.pl,
+      "pr" => env.pr, )
+
+function read_dict(::Val{:ACE1_TwoSidedEnvelope}, D::Dict) 
+   T = read_dict(D["T"])
+   return TwoSidedEnvelope(T(D["xl"]), T(D["xr"]), Int(D["pl"]), Int(D["pr"]))
+end
+
+# -------------------- utility function to construct radial basis with envelope 
+
+
+"""
+`transformed_jacobi_env(maxdeg, trans, envelope, rcut, rin)`
+
+This creates a radial basis where the cutoff mechanism is provided by the 
+envelope in the r domain. The orthogonality relation of the basis does not 
+include the envelope which can therefore be interpreted as a prior. 
+"""
+function transformed_jacobi_env(maxdeg::Integer,
+                                trans::DistanceTransform,
+                                envelope::AbstractEnvelope, 
+                                rcut::Real, rin::Real = 0.0;
+                                kwargs...)
+   J =  discrete_jacobi(maxdeg; 
+            tcut = transform(trans, rcut),
+            tin = transform(trans, rin),
+            pcut = 0,
+            kwargs...)
+   return TransformedPolys(J, trans, rin, rcut, envelope)
+end
 
 
 end

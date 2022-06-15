@@ -6,9 +6,6 @@
 # --------------------------------------------------------------------------
 
 
-
-@testset "Transforms" begin
-
 ##
 using ACE1, Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d
@@ -19,6 +16,7 @@ maxdeg = 10
 
 @info("Testing Transforms and TransformedPolys")
 for p in 2:4
+   local h, trans 
    @info("p = $p, random transform")
    trans = PolyTransform(1+rand(), 1+rand())
    @info("      test (de-)dictionisation")
@@ -52,6 +50,7 @@ for p = 2:4
    trans = PolyTransform(p, r0)
    ACE1.Testing.test_transform(trans, [r0/2, 3*r0])
 end
+println()
 
 ##
 @info("Testing Morse Transform")
@@ -60,6 +59,7 @@ for lam = 1.0:3.0
    trans = ACE1.Transforms.MorseTransform(lam, r0)
    ACE1.Testing.test_transform(trans, [r0/2, 3*r0])
 end
+println()
 
 ##
 
@@ -69,6 +69,7 @@ for p = 2:4
    trans = ACE1.Transforms.AgnesiTransform(r0, p)
    ACE1.Testing.test_transform(trans, [r0/2, 3*r0])
 end
+println()
 
 ##
 
@@ -159,4 +160,3 @@ println_slim(@test all(JuLIP.Testing.test_fio(trans)))
 
 ##
 
-end

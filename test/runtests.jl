@@ -5,7 +5,7 @@
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
-
+##
 using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
       JuLIP, JuLIP.Testing
 
@@ -13,14 +13,14 @@ using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
 @testset "ACE1.jl" begin
     # ------------------------------------------
     #   basic polynomial basis building blocks
-    include("polynomials/test_ylm.jl")
-    include("polynomials/test_rylm.jl")
-    include("polynomials/test_transforms.jl")
-    include("polynomials/test_orthpolys.jl")
+    @testset "Ylm" begin include("polynomials/test_ylm.jl") end 
+    @testset "Real  Ylm" begin include("polynomials/test_rylm.jl") end 
+    @testset "Transforms" begin include("polynomials/test_transforms.jl") end 
+    @testset "OrthogonalPolynomials" begin include("polynomials/test_orthpolys.jl") end 
 
     # --------------------------------------------
     # core permutation-invariant functionality
-    include("test_1pbasis.jl")
+    @testset "1-Particle Basis"  begin include("test_1pbasis.jl") end 
     include("test_pibasis.jl")
     include("test_pipot.jl")
 
