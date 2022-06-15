@@ -22,7 +22,7 @@ using ACE1.Transforms: DistanceTransform, transform, transform_d,
 
 import Base: ==
 
-export transformed_jacobi, transformed_jacobi_env, PolyEnvelope
+export transformed_jacobi, transformed_jacobi_env, PolyEnvelope, TwoSidedEnvelope
 
 # this is a hack to prevent a weird compiler error that I don't understand
 # at all yet
@@ -309,8 +309,8 @@ function evaluate_d!(P, dP, tmp, J::TransformedPolys, r, args...; maxn=length(J)
    dt = transform_d(J.trans, r, args...)
    # evaluate the actual Jacobi polynomials + derivatives w.r.t. x
    evaluate_ed!(P, dP, nothing, J.J, t, maxn=maxn)
-   e = evaluate(J.envelope, r)
-   de = evaluate_d(J.envelope, r)
+   e = evaluate(J.envelope, J.trans, r)
+   de = evaluate_d(J.envelope, J.trans, r)
    @. dP = de * P + e * dP
    return dP
 end
@@ -369,16 +369,30 @@ import ForwardDiff
 
 abstract type AbstractEnvelope end 
 
+abstract type AbstractEnvelopeX <: AbstractEnvelope end 
+
+abstract type AbstractEnvelopeR <: AbstractEnvelope end 
+
+evaluate(env::AbstractEnvelopeR, trans, r::Real) = evaluate(env, r) 
+
+evaluate_d(env::AbstractEnvelopeR, trans, r::Real) = evaluate_d(env, r) 
+
+evaluate(env::AbstractEnvelopeX, trans, r::Real) = 
+      evaluate(env, transform(trans, r)) 
+
+evaluate_d(env::AbstractEnvelopeX, trans, r::Real) = 
+      evaluate_d(env, transform(trans, r)) * transform_d(trans, r)
+
 evaluate_d(env::AbstractEnvelope, r::Real) = 
       ForwardDiff.derivative( r1 -> evaluate(env, r1), r )
 
-struct OneEnvelope <: AbstractEnvelope 
+struct OneEnvelope <: AbstractEnvelopeR
 end
 
 evaluate(env::OneEnvelope, r::T) where {T <: Real} = one(T)
 
 
-struct PolyEnvelope{T} <: AbstractEnvelope 
+struct PolyEnvelope{T} <: AbstractEnvelopeR
    p::Int
    r0::T 
    rcut::T
@@ -389,6 +403,22 @@ function evaluate(env::PolyEnvelope, r::T) where {T <: Real}
    s = r/r0; scut = rcut/r0 
    return s^(-p) - scut^(-p) + p * scut^(-p-1) * (s - scut)
 end
+
+
+struct TwoSidedEnvelope{T} <: AbstractEnvelopeX
+   xl::T 
+   xr::T 
+   pl::Int 
+   pr::Int
+end
+
+function evaluate(env::TwoSidedEnvelope, x)
+   if x <= min(env.xl, env.xr) || x >= max(env.xl, env.xr) 
+      return 0.0
+   end
+   return  (x - env.xl)^(env.pl) * (x - env.xr)^(env.pr)
+end
+
 
 # -------------------- utility function to construct radial basis with envelope 
 

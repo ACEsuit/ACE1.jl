@@ -53,13 +53,14 @@ struct PolyTransform{TP, T} <: DistanceTransform
    a::T 
 end
 
+PolyTransform(p, r0) = PolyTransform(p, r0, one(eltype(r0)))
 PolyTransform(; p = 2, r0 = 2.5, a = 1.0) = PolyTransform(p, r0, a)
 
 write_dict(T::PolyTransform) =
    Dict("__id__" => "ACE1_PolyTransform", 
              "p" => T.p, 
             "r0" => T.r0, 
-          "a" => T.a)
+             "a" => T.a)
 
 PolyTransform(D::Dict) = PolyTransform(D["p"], D["r0"], D["a"])
 
