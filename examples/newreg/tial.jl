@@ -32,8 +32,8 @@ ACE_B = ace_basis(species = species,
 # radial basis 
 trans_r = AgnesiTransform(r0)
 envelope_r = ACE1.PolyEnvelope(2, r0, rcut)
-Jold = transformed_jacobi(16, trans_r, rcut)
-Jnew = transformed_jacobi_env(16, trans_r, envelope_r, rcut)
+Jold = transformed_jacobi(6, trans_r, rcut)
+Jnew = transformed_jacobi_env(6, trans_r, envelope_r, rcut)
 
 Bpair_old = PolyPairBasis(Jold, species)
 Bpair_new = PolyPairBasis(Jnew, species)
@@ -97,7 +97,7 @@ elseif trans isa AgnesiTransform
    rmse_table(test)
 
    dB = LsqDB("", Bnew, train);
-   solver = Dict("solver" => :rrqr, "rrqr_tol" => 2e-6, "P" => Γ)
+   solver = Dict("solver" => :rrqr, "rrqr_tol" => 1e-6, "P" => Γ)
    IP_new, lsqinfo_new = lsqfit(dB, solver=solver, weights=weights, Vref=Vref, error_table = true)
    IPFitting.add_fits!(IP_new, test)
    rmse_table(lsqinfo_new["errors"])
@@ -161,11 +161,12 @@ zbl = JuLIP.ZBLPotential()
 
 function dat_dimer(r, z1, z0) 
    at = at_dimer(r, z1, z0)
-   E = ACE1.evaluate(envelope, r)
+   E = ACE1.evaluate(envelope_r, r)
    # zbl(r, z1, z0) 
    # + Vref.E0[chemical_symbol(z1)] + Vref.E0[chemical_symbol(z0)]
    return Dat(at, "dimer", E = E)
 end
+
 
 B_ = Bnew
 
@@ -271,12 +272,12 @@ zTi = AtomicNumber(:Ti)
 rr = range(0.1, rcut, length=200)
 
 plt = plot(; ylims = [-10, 10], xlims = [0.0, 5.5])
-# plot!(plt, rr, dimer.(Ref(IP_old), rr, zAl, zAl), lw=2, c=1, ls=:dash, label = "AlAl-old")
-plot!(plt, rr, dimer.(Ref(IP_ard), rr, zAl, zAl), lw=2, c=1, ls=:solid, label = "AlAl-new")
-# plot!(plt, rr, dimer.(Ref(IP_old), rr, zAl, zTi), lw=2, c=2, ls=:dash, label =  "AlTi-old")
-plot!(plt, rr, dimer.(Ref(IP_ard), rr, zAl, zTi), lw=2, c=2, ls=:solid, label = "AlTi-new")
-# plot!(plt, rr, dimer.(Ref(IP_old), rr, zTi, zTi), lw=2, c=3, ls=:dash, label =  "TiTi-old")
-plot!(plt, rr, dimer.(Ref(IP_ard), rr, zTi, zTi), lw=2, c=3, ls=:solid, label = "TiTi-new")
+# plot!(plt, rr, dimer_energy.(Ref(IP_old), rr, zAl, zAl), lw=2, c=1, ls=:dash, label = "AlAl-old")
+plot!(plt, rr, dimer_energy.(Ref(IP_ard), rr, zAl, zAl), lw=2, c=1, ls=:solid, label = "AlAl-new")
+# plot!(plt, rr, dimer_energy.(Ref(IP_old), rr, zAl, zTi), lw=2, c=2, ls=:dash, label =  "AlTi-old")
+plot!(plt, rr, dimer_energy.(Ref(IP_ard), rr, zAl, zTi), lw=2, c=2, ls=:solid, label = "AlTi-new")
+# plot!(plt, rr, dimer_energy.(Ref(IP_old), rr, zTi, zTi), lw=2, c=3, ls=:dash, label =  "TiTi-old")
+plot!(plt, rr, dimer_energy.(Ref(IP_ard), rr, zTi, zTi), lw=2, c=3, ls=:solid, label = "TiTi-new")
 vline!(plt, [rnn(:Ti), rnn(:Al)], c=:black, lw=2, label = "rnn")
 
 rdf = get_rdf(data, 5.5)
@@ -333,3 +334,80 @@ plot!(plt, rr, dimer.(Ref(IP), rr, zAl, zTi), lw=2, c=2, ls=:solid, label = "AlT
 # plot!(plt, rr, dimer.(Ref(IP_old), rr, zTi, zTi), lw=2, c=3, ls=:dash, label =  "TiTi-old")
 plot!(plt, rr, dimer.(Ref(IP), rr, zTi, zTi), lw=2, c=3, ls=:solid, label = "TiTi-new")
 vline!(plt, [rnn(:Ti), rnn(:Al)], c=:black, lw=2, label = "rnn")
+
+
+
+##
+
+function dat_dimer(r, z1, z0) 
+   at = at_dimer(r, z1, z0)
+   E = (ACE1.evaluate(envelope_r, r) + 
+        Vref.E0[chemical_symbol(z1)] + Vref.E0[chemical_symbol(z0)] )
+   return Dat(at, "dimer", E = E)
+end
+
+B_ = Bnew
+
+dB = LsqDB("", B_, train);
+A, y = IPFitting.Lsq.get_lsq_system(dB; Vref=Vref, weights=weights)
+
+r1 = 2.2
+w_core = 100
+r_core = 1e-3
+e_core = ACE1.evaluate(envelope_r, r_core)
+A_core = zeros(3, length(B_))
+y_core = zeros(3)
+for (i, (z1, z0)) in enumerate([(zAl, zAl), (zAl, zTi), (zTi, zTi)])
+   dat_core = dat_dimer(r_core, z1, z0)
+   A_core[i,:] = w_core * energy(B_, dat_core.at) / e_core
+   y_core[i] = w_core * dat_core.D["E"][1] / e_core
+end
+
+A1 = [A; A_core]
+y1 = [y; y_core] 
+
+A2 = A1 / Γ
+y2 = y1 
+
+
+# F = pqrfact(A2, rtol = 1e-6)
+# θ_til = F \ y2 
+# θ = Γ \ θ_til
+# IP = ACE1.combine(B_, θ)
+
+clf = ARD(n_iter=ard_n_iter, threshold_lambda = ard_threshold_lambda, tol=ard_tol, fit_intercept=fit_intercept, normalize=true, compute_score=true)
+clf.fit(A2, y2)
+c = Γ \ clf.coef_
+IP = ACE1.combine(B_, c)
+
+
+@info("Test Error")
+IPFitting.add_fits!(IP, test)
+rmse_table(test)
+
+
+
+
+##
+
+zAl = AtomicNumber(:Al)
+zTi = AtomicNumber(:Ti)
+rr = range(0.1, rcut, length=200)
+
+plt = plot(; ylims = [-10, 10], xlims = [0.0, 5.5])
+# plot!(plt, rr, dimer_energy.(Ref(IP_old), rr, zAl, zAl), lw=2, c=1, ls=:dash, label = "AlAl-old")
+plot!(plt, rr, dimer_energy.(Ref(IP), rr, zAl, zAl), lw=2, c=1, ls=:solid, label = "AlAl-new")
+# plot!(plt, rr, dimer_energy.(Ref(IP_old), rr, zAl, zTi), lw=2, c=2, ls=:dash, label =  "AlTi-old")
+plot!(plt, rr, dimer_energy.(Ref(IP), rr, zAl, zTi), lw=2, c=2, ls=:solid, label = "AlTi-new")
+# plot!(plt, rr, dimer_energy.(Ref(IP_old), rr, zTi, zTi), lw=2, c=3, ls=:dash, label =  "TiTi-old")
+plot!(plt, rr, dimer_energy.(Ref(IP), rr, zTi, zTi), lw=2, c=3, ls=:solid, label = "TiTi-new")
+vline!(plt, [rnn(:Ti), rnn(:Al)], c=:black, lw=2, label = "rnn")
+
+rdf = get_rdf(data, 5.5)
+h1 = histogram(rdf[(zAl, zAl)], nbins=100, c=1, label = "rdf(Al, Al)", xlims = [0.0, 5.5])
+h2 = histogram(rdf[(zAl, zTi)], nbins=100, c=2, label = "rdf(Al, Ti)", xlims = [0.0, 5.5])
+h3 = histogram(rdf[(zTi, zTi)], nbins=100, c=3, label = "rdf(Ti, Ti)", xlims = [0.0, 5.5])
+
+plot(plt, h1, h2, h3, 
+     layout = Plots.GridLayout(4,1, heights=[0.7, 0.1, 0.1, 0.1]), 
+     size = (600, 800))
