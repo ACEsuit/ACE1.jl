@@ -127,7 +127,7 @@ Implements the distance transform
 ```
 with default $a = (p-1)/(p+1)$. That default is chosen such that
 $|x'(r)|$ is maximised at $r = r_0$. Default for $p$ is $p = 2$. Any value
-$p > 1$ is permitted.
+$p > 1$ is permitted, but $p >= 2$ is recommended. 
 
 Constructor:
 ```
@@ -138,21 +138,47 @@ struct AgnesiTransform{T, TP} <: DistanceTransform
    r0::T
    p::TP
    a::T
-   c::T
+   rin::T
 end
 
 AgnesiTransform(r0, p=2, a=(p-1)/(p+1)) = (@assert p > 1;
-                             AgnesiTransform(r0, p, a, - a * p / r0))
+                  AgnesiTransform(r0, p, a, zero(eltype(r0))))
+
+AgnesiTransform(; r0 = nothing, 
+                  p = 2, 
+                  a = (p-1)/(p+1), 
+                  rin = zero(eltype(r0)), ) = 
+         AgnesiTransform(r0, p, a, rin)
 
 write_dict(T::AgnesiTransform) =
-Dict("__id__" => "ACE1_AgnesiTransform", "r0" => T.r0, "p" => T.p, "a" => T.a)
-AgnesiTransform(D::Dict) = AgnesiTransform(D["r0"], D["p"], D["a"])
+      Dict("__id__" => "ACE1_AgnesiTransform", 
+           "r0" => T.r0, "p" => T.p, "a" => T.a, "rin" => T.rin)
+
+AgnesiTransform(D::Dict) = AgnesiTransform(; r0=D["r0"], p=D["p"], 
+                                             a=D["a"], rin=D["rin"])
+
 read_dict(::Val{:ACE1_AgnesiTransform}, D::Dict) = AgnesiTransform(D)
-transform(t::AgnesiTransform, r::Number) = @fastmath 1 / (1 + t.a * (r/t.r0)^t.p)
-transform_d(t::AgnesiTransform, r::Number) = (s1 = (r/t.r0); s2 = s1^(t.p-1);
-                                         @fastmath t.c * s2 / (1+t.a * s2*s1)^2)
-inv_transform(t::AgnesiTransform, x::Number) = t.r0 * ( (1/x-1)/t.a )^(1/t.p)
-(t::AgnesiTransform)(x) = transform(t, x)
+
+function transform(t::AgnesiTransform{T}, r::Number) where {T} 
+   if r <= t.rin 
+      return one(T) 
+   end 
+   s = (r-t.rin)/(t.r0-t.rin)
+   return 1 / (1 + t.a * s^t.p)
+end
+
+transform_d(t::AgnesiTransform, r::Number) = 
+     ForwardDiff.derivative(r -> transform(t, r), r)
+
+# (s1 = (r/t.r0); s2 = s1^(t.p-1);
+# @fastmath t.c * s2 / (1+t.a * s2*s1)^2)
+
+function inv_transform(t::AgnesiTransform, x::Number) 
+   s = ( (1/x-1)/t.a )^(1/t.p)   # s = (r - rin) / (r0 - rin)
+   return t.rin + s * (t.r0 - t.rin)
+end
+
+(t::AgnesiTransform)(r) = transform(t, r)
 
 
 # --------- AnalyticTransform 
