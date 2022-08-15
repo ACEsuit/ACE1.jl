@@ -29,6 +29,7 @@ mutable struct PIPotential{T, NZ, TPI, TEV} <: SitePotential
    coeffs::NTuple{NZ, Vector{T}}
    dags::NTuple{NZ, CorrEvalGraph{T, Int}}
    evaluator::TEV
+   committee::Union{Nothing, NTuple{NZ, Matrix{T}}}
 end
 
 cutoff(V::PIPotential) = cutoff(V.pibasis)
