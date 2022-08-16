@@ -43,6 +43,8 @@ include("rpi/rpi.jl")
 include("pairpots/pair.jl");
 @reexport using ACE1.PairPotentials
 
+include("committee.jl")
+
 # lots of stuff related to random samples:
 #  - random configurations
 #  - random potentials

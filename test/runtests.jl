@@ -41,6 +41,7 @@ using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
     # TODO: These tests are current failing - should be re-examined and fixed 
     # include("compat/test_compat.jl")
 
+    @testset "Committee" begin include("test_committee.jl") end 
     include("test_any.jl")
     include("polynomials/test_multitrans.jl")
 end
