@@ -24,12 +24,12 @@ export PIPotential
 `struct PIPotential` : specifies a PIPotential, which is basically defined
 through a PIBasis and its coefficients
 """
-mutable struct PIPotential{T, NZ, TPI, TEV} <: SitePotential
+mutable struct PIPotential{T, NZ, TPI, TEV, NCO} <: SitePotential
    pibasis::TPI
    coeffs::NTuple{NZ, Vector{T}}
    dags::NTuple{NZ, CorrEvalGraph{T, Int}}
    evaluator::TEV
-   committee::Union{Nothing, NTuple{NZ, Matrix{T}}}
+   committee::Union{Nothing, NTuple{NZ, Vector{SVector{NCO, T}}}}
 end
 
 cutoff(V::PIPotential) = cutoff(V.pibasis)
@@ -50,6 +50,9 @@ standardevaluator(V::PIPotential) =
 
 maxorder(V::PIPotential) = maxorder(V.pibasis)
 
+ncommittee(V::PIPotential{T, NZ, TPI, TEV, NCO}) where {T, NZ, TPI, TEV, NCO} = 
+   isnothing(V.committee) ? 0 : NCO 
+
 # ------------------------------------------------------------
 #   Initialisation code
 # ------------------------------------------------------------
@@ -67,6 +70,12 @@ end
 function PIPotential(basis::PIBasis, coeffs_t::Tuple)
    dags = ntuple(iz0 -> _getdagfrombasis(basis.inner[iz0], coeffs_t[iz0]), numz(basis))
    return PIPotential(basis, coeffs_t, dags, DAGEvaluator())
+end
+
+function PIPotential(basis::TPI, coeffs_t::NTuple{NZ, Vector{T}}, 
+                     dags::Tuple, evaluator::TEV
+                     ) where {NZ ,T, TPI <: PIBasis, TEV} 
+   return PIPotential{T, NZ, TPI, TEV, 0}(basis, coeffs_t, dags, evaluator, nothing)
 end
 
 function _getdagfrombasis(inner, c)

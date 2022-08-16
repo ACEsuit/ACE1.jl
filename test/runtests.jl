@@ -21,8 +21,8 @@ using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
     # --------------------------------------------
     # core permutation-invariant functionality
     @testset "1-Particle Basis"  begin include("test_1pbasis.jl") end 
-    include("test_pibasis.jl")
-    include("test_pipot.jl")
+    @testset "PIBasis"  begin include("test_pibasis.jl") end 
+    @testset "PIPotential"  begin include("test_pipot.jl") end 
 
     # ------------------------
     #   rotation_invariance
