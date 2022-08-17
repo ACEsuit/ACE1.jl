@@ -73,12 +73,17 @@ E1 = energy(V, at)
 E2, co_E = ACE1.co_energy(co_V, at)
 println_slim(@test E1 ≈ E2 ≈ mean(co_E))
 
-##
-
 @info("check forces")
 F1 = forces(V, at)
 F2, co_F = ACE1.co_forces(co_V, at)
 println_slim(@test (F1 ≈ F2 ≈ mean(co_F)))
+
+##
+
+@info("check virial")
+vir1 = virial(V, at)
+vir2, co_vir = ACE1.co_virial(co_V, at)
+println_slim(@test (vir1 ≈ vir2 ≈ mean(co_vir)))
 
 ##
 
@@ -89,5 +94,6 @@ for i in 1:NCO
    co_V.coeffs[iz0][:] .= ACE1.get_committee_coeffs(co_V, z0, i)
    print_tf(@test( energy(co_V, at) ≈ co_E[i] ))
    print_tf(@test( forces(co_V, at) ≈ co_F[i] ))
+   print_tf(@test( virial(co_V, at) ≈ co_vir[i] ))
 end
 co_V.coeffs[iz0][:] .= _c0[:]
