@@ -179,3 +179,44 @@ function co_evaluate_d!(dEs, co_dEs, tmpd,
    return dEs, co_dEs
 end
 
+
+
+# ------------------------------------------------------------
+#   Total Energy, forces, virials 
+#   this is basically a copy-paste of the JuLIP implementation
+#   surely we can do this more generally ... 
+
+using Base.Threads: nthreads, threadid
+using JuLIP: neighbourlist 
+using JuLIP.Potentials: neigsz! 
+
+function co_energy(V::PIPotential, at::AbstractAtoms)
+   assert_has_co(V)
+   nt = nthreads()
+   NCO = ncommittee(V)
+   T = fltype(V)
+   tmp = [ alloc_temp(V, at) for _ in 1:nt ]
+   E = [ zero(T) for _ in 1:nt ]
+   co_E = [ zero(SVector{NCO, fltype(V)}) for _=1:nt ]
+   return co_energy!(E, co_E, tmp, V, at)
+end
+
+function co_energy!(E, co_E, tmp, V, at)
+   assert_has_co(V)
+   NCO = ncommittee(V)
+   nt = nthreads() 
+   @assert nt == length(tmp) == length(co_E)
+   @assert all(length(co_E[i]) == NCO for i in 1:nt)
+   nlist = neighbourlist(at, cutoff(V))
+   @threads for i = 1:length(at) 
+      tid = threadid() 
+      z0 = at.Z[i] 
+      j, Rs, Zs = neigsz!(tmp[tid], nlist, at, i)
+      Es, co_Es = co_evaluate!(tmp[tid], V, Rs, Zs, z0)
+      E[tid] += Es 
+      co_E[tid] += co_Es 
+   end
+   return sum(E), sum(co_E)
+end
+
+
