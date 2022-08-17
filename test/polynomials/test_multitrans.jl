@@ -29,6 +29,7 @@ trans = multitransform(transforms)
 for f in [transform, transform_d], z in (zFe, zC, zAl), z0 in (zFe, zC, zAl)
    z == zAl && z0 == zFe && continue    
    for ntest = 1:5 
+      local r 
       r = 1 + rand()
       print_tf(@test (f(trans, r, z, z0) 
                         == f(PolyTransform(2, (rnn(z)+rnn(z0)) / 2), r)))
@@ -40,6 +41,7 @@ println()
 
 @info("Checking the non-symmetric case")
 for f in [transform, transform_d]
+   local r 
    r = 1 + rand()
    println_slim(@test (f(trans, r, zAl, zFe) == 
             f(PolyTransform(2, (rnn(:Al)+rnn(:Fe)) / 2 + 1), r)))
@@ -54,6 +56,7 @@ trans = multitransform(transforms, rin = rin, rcut = rcut)
 
 xmin = 1e30; xmax = - 1e30 
 for ntest = 1:100
+   local r, z0 
    r = rin + rand() * (rcut - rin)
    z, z0 = (rand([zFe, zC, zAl], 2)...,)
    x = transform(trans, r, z, z0)
@@ -85,7 +88,7 @@ trans2 = multitransform(transforms, cutoffs=cutoffs)
 
 xmin = 1e30; xmax = - 1e30 
 for ntest = 1:100
-   local rin, rcut 
+   local rin, rcut , z0, s, r 
    z, z0 = (rand([zFe, zC, zAl], 2)...,)
    s, s0 = chemical_symbol.((z, z0))
    rin, rcut = try 
@@ -106,10 +109,12 @@ println()
 
 @info("check at the boundaries")
 for ((s, s0), (rin, rcut)) in cutoffs 
+   local z0, z
    z, z0 = AtomicNumber.((s, s0))
    print_tf( @test( transform(trans2, rin, z, z0) ≈ -1 ) )
    print_tf( @test( transform(trans2, rcut, z, z0) ≈ 1 ) )
 end
+println() 
 
 ##
 
@@ -149,6 +154,7 @@ println_slim(@test (try
 
 @info("some random finite-difference tests")
 for ntest = 1:30 
+   local r, z0 
    r = 2 + rand() 
    z, z0 = (rand([zFe, zC, zAl], 2)...,)
    P = evaluate(B, r, z, z0)
@@ -158,7 +164,7 @@ for ntest = 1:30
    dF = t -> [ dot( evaluate_d(B, t[1], zFe, zC), U ) ] 
    print_tf(@test all( JuLIP.Testing.fdtest(F, dF, [r], verbose=false) ))
 end
-
+println() 
 
 ## read / write 
 

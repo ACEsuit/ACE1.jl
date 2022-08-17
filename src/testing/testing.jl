@@ -11,12 +11,9 @@ module Testing
 
 using Test
 import ACE1
-import InteractiveUtils
-
 
 using BenchmarkTools: @belapsed
 using LinearAlgebra: eigvals, eigen, norm 
-using ProgressMeter: @showprogress
 
 import JuLIP.Potentials: F64fun
 import JuLIP: Atoms, bulk, rattle!, positions, energy, forces, JVec,
