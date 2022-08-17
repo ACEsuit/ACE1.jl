@@ -69,10 +69,18 @@ using JuLIP
 at = rattle!(bulk(:Cu, cubic=true) * 2, 0.2)
 
 @info("check energy")
-E, co_E = ACE1.co_energy(co_V, at)
-println_slim(@test E ≈ mean(co_E))
+E1 = energy(V, at)
+E2, co_E = ACE1.co_energy(co_V, at)
+println_slim(@test E1 ≈ E2 ≈ mean(co_E))
 
+##
 
+@info("check forces")
+F1 = forces(V, at)
+F2, co_F = ACE1.co_forces(co_V, at)
+println_slim(@test (F1 ≈ F2 ≈ mean(co_F)))
+
+##
 
 @info("check individual committee members: energy, ...")
 iz0 = ACE1.z2i(V, z0)
@@ -80,5 +88,6 @@ _c0 = copy(co_V.coeffs[iz0])
 for i in 1:NCO
    co_V.coeffs[iz0][:] .= ACE1.get_committee_coeffs(co_V, z0, i)
    print_tf(@test( energy(co_V, at) ≈ co_E[i] ))
+   print_tf(@test( forces(co_V, at) ≈ co_F[i] ))
 end
 co_V.coeffs[iz0][:] .= _c0[:]

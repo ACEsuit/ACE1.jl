@@ -182,12 +182,12 @@ end
 
 
 # ------------------------------------------------------------
-#   Total Energy, forces, virials 
+#   Total Energy
 #   this is basically a copy-paste of the JuLIP implementation
 #   surely we can do this more generally ... 
 
-using Base.Threads: nthreads, threadid
-using JuLIP: neighbourlist 
+using Base.Threads: nthreads, threadid, @threads
+using JuLIP: neighbourlist, maxneigs
 using JuLIP.Potentials: neigsz! 
 
 function co_energy(V::PIPotential, at::AbstractAtoms)
@@ -205,7 +205,7 @@ function co_energy!(E, co_E, tmp, V, at)
    assert_has_co(V)
    NCO = ncommittee(V)
    nt = nthreads() 
-   @assert nt == length(tmp) == length(co_E)
+   @assert nt == length(tmp) == length(E) == length(co_E)
    @assert all(length(co_E[i]) == NCO for i in 1:nt)
    nlist = neighbourlist(at, cutoff(V))
    @threads for i = 1:length(at) 
@@ -220,3 +220,51 @@ function co_energy!(E, co_E, tmp, V, at)
 end
 
 
+# ------------------------------------------------------------
+#   Total forces
+
+function co_forces(V::PIPotential, at::AbstractAtoms)
+   assert_has_co(V)
+   nt = nthreads()
+   NCO = ncommittee(V)
+   T = fltype(V)
+   tmp_d = [ alloc_temp_d(V, at) for _ in 1:nt ]
+   F0 = zeros(JVec{T}, length(at))
+   F = [ copy(F0) for _ in 1:nt ]
+   co_F = [ SVector(ntuple(_ -> copy(F0), NCO)...) for _ in 1:nt ] 
+   return co_forces!(F, co_F, tmp_d, V, at)
+end
+
+function co_forces!(F, co_F, tmp_d, V, at)
+   assert_has_co(V)
+   NCO = ncommittee(V)
+   T = fltype(V)
+   nt = nthreads() 
+   @assert nt == length(tmp_d) == length(F) == length(co_F)
+   @assert all(length(co_F[i]) == NCO for i in 1:nt)
+   nlist = neighbourlist(at, cutoff(V))
+
+   # allocate storage for the site energy gradients 
+   dV0 = zeros(SVector{3, T}, maxneigs(nlist))
+   dV = [ copy(dV0) for _ in 1:nt ]
+   co_dV = [ SVector(ntuple(_ -> copy(dV0), NCO)...) for _ in 1:nt ]
+
+   @threads for i = 1:length(at) 
+      tid = threadid() 
+      z0 = at.Z[i] 
+      j, Rs, Zs = neigsz!(tmp_d[tid], nlist, at, i)
+      co_evaluate_d!(dV[tid], co_dV[tid], tmp_d[tid], 
+                                   V, Rs, Zs, z0)
+      frc = F[tid] 
+      co_frc = co_F[tid]                                   
+      for a = 1:length(j)
+         F[tid][j[a]] -= dV[tid][a]
+         F[tid][i]    += dV[tid][a]
+         for ico = 1:NCO
+            co_F[tid][ico][j[a]] -= co_dV[tid][ico][a]
+            co_F[tid][ico][i]    += co_dV[tid][ico][a]
+         end
+      end
+   end
+   return sum(F), sum(co_F)
+end
