@@ -28,6 +28,7 @@ V = combine(basis, c)
 co_V = ACE1.committee_potential(basis, c, co_c)
 Pr = V.pibasis.basis1p.J
 
+##
 Nat = 15
 Rs, Zs, z0 = ACE1.rand_nhd(Nat, Pr, :Cu)
 
@@ -97,3 +98,11 @@ for i in 1:NCO
    print_tf(@test( virial(co_V, at) ≈ co_vir[i] ))
 end
 co_V.coeffs[iz0][:] .= _c0[:]
+
+## 
+
+@info("testing FIO ... ")
+@info("   ... without committee")
+println_slim(@test all( JuLIP.Testing.test_fio(V) ))
+@info("   ... with committee")
+println_slim(@test all( JuLIP.Testing.test_fio(co_V) ))

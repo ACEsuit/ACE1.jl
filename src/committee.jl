@@ -36,12 +36,18 @@ function committee_potential(basis::RPIBasis,
    # ... and now to a vector of SVectors 
    co_c_pi = ntuple(iz0 -> reinterpret(SVector{NCO, T}, co_c_pi_pre[iz0]')[:],
                     NZ)
-
-   evaluator = StandardEvaluator()
-   dags = ntuple(iz0 -> CorrEvalGraph{T, Int}(), NZ)
-   
-   return PIPotential(basis.pibasis, c_pi, dags, evaluator, co_c_pi)                              
+   return PIPotential(basis.pibasis, c_pi, co_c_pi)
 end
+
+
+function PIPotential(pibasis::PIBasis, c::Tuple, co_c::Tuple) 
+   NZ = numz(pibasis)
+   T = eltype(c[1])
+   evaluator = StandardEvaluator()
+   dags = ntuple(iz0 -> CorrEvalGraph{T, Int}(), NZ)   
+   return PIPotential(pibasis, c, dags, evaluator, co_c)                              
+end
+
 
 """
 return the coefficients for committee member i with center atom species z0.
@@ -51,6 +57,23 @@ function get_committee_coeffs(V::PIPotential, z0::AtomicNumber, i::Integer)
    return [ x[i] for x in V.committee[iz0] ]
 end
 
+
+write_committee(::Nothing) = "nothing"
+
+write_committee(committee::Tuple) = committee 
+
+read_committee(str::String) = (@assert str == "nothing"; nothing)
+
+function read_committee(committee::Union{AbstractVector, Tuple}) 
+   NZ = length(committee)
+   NCO = length(first(first(committee)))
+   T = typeof(first(first(first(committee))))
+
+   _read_committee(committee, TV, ::Val{NZ}) where {NZ}  = 
+          ntuple(iz0 -> TV.(committee[iz0]), NZ)
+
+   return _read_committee(committee, SVector{NCO, T}, Val(NZ))
+end
 
 
 # ------------------------------------------------------------

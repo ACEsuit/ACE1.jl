@@ -10,7 +10,6 @@
 
 ##
 
-
 using ACE1, ACE1.Testing
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing, Random
 using JuLIP: evaluate, evaluate_d, evaluate_ed
