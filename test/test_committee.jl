@@ -21,7 +21,7 @@ rcut = 2.5 * r0
 basis = ACE1.Utils.rpi_basis(; species=:Cu, N=3, r0=r0, maxdeg=maxdeg, rcut=rcut)
 len = length(basis) 
 NCO = 12 
-co_c = Diagonal(1 ./ (1:len).^2) * randn(len, 12)
+co_c = Diagonal(1 ./ (1:len).^2) * randn(len, NCO)
 c = mean(co_c, dims=(2,))[:]
 
 V = combine(basis, c)
