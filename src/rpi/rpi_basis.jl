@@ -240,11 +240,12 @@ _znlms2b(zz, nn, ll, mm = zero(ll), z0 = AtomicNumber(0)) =
                           length(zz)) )
 
 
-function combine(basis::RPIBasis, coeffs)
-   picoeffs = ntuple(iz0 -> (coeffs[basis.Bz0inds[iz0]]' * basis.A2Bmaps[iz0])[:],
-                     numz(basis.pibasis))
-   return PIPotential(basis.pibasis, picoeffs)
-end
+get_picoeffs(basis, coeffs) = 
+         ntuple(iz0 -> (coeffs[basis.Bz0inds[iz0]]' * basis.A2Bmaps[iz0])[:],
+                numz(basis.pibasis))
+
+combine(basis::RPIBasis, coeffs) = 
+       PIPotential(basis.pibasis, get_picoeffs(basis, coeffs))
 
 """
 `scaling(basis::RPIBasis, p[; a2b = abs2, fin = ...])` : same as usual but adds a keyword

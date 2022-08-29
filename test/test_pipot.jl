@@ -6,10 +6,9 @@
 # --------------------------------------------------------------------------
 
 
-@testset "PIPotential"  begin
+
 
 ##
-
 
 using ACE1, ACE1.Testing
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing, Random
@@ -119,6 +118,7 @@ for species in (:X, :Si, [:C, :O, :H]), N = 1:5
       dV0_dUs = sum(transpose.(dV0) .* Us)
       errs = []
       for p = 2:12
+         local h 
          h = 0.1^p
          V_h = evaluate(V, Rs + h * Us, Zs, z0)
          dV_h = (V_h - V0) / h
@@ -150,6 +150,7 @@ naive_energy(V::PIPotential, at) =
             for (i, j, Rs) in sites(at, cutoff(V)) )
 
 for N = 1:5
+   local species, maxdeg, Pr, P1, basis, c, V, at 
    species = :Si
    maxdeg = 7
    Pr = transformed_jacobi(maxdeg, trans, 4.0; pcut = 2)
@@ -176,4 +177,3 @@ end
 
 ##
 
-end

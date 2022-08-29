@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------
 
 
-@testset "PIBasis"  begin
+
 
 ##
 
@@ -82,7 +82,7 @@ println_slim(@test D == D_)
 
 @info("Check several properties of PIBasis")
 for species in (:X, :Si, [:C, :O, :H]), N = 1:5
-   local AA, AAdag, dAA, dAAdag, dagbasis, basis, Rs, Zs, z0
+   local AA, AAdag, dAA, dAAdag, dagbasis, basis, Rs, Zs, z0, maxdeg, Nat, P1
    maxdeg = 7
    Nat = 15
    P1 = ACE1.BasicPSH1pBasis(Pr; species = species)
@@ -109,6 +109,7 @@ for species in (:X, :Si, [:C, :O, :H]), N = 1:5
       dAA_dUs = transpose.(dAA) * Us
       errs = []
       for p = 2:12
+         local h 
          h = 0.1^p
          AA_h = evaluate(basis, Rs + h * Us, Zs, z0)
          dAA_h = (AA_h - AA) / h
@@ -138,4 +139,3 @@ println()
 ##
 
 
-end

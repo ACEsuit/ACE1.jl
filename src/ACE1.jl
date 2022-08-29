@@ -11,6 +11,12 @@ module ACE1
 using Reexport
 @reexport using JuLIP
 
+import Pkg 
+import Base.pkgdir
+pkgproject(m::Core.Module) = Pkg.Operations.read_project(Pkg.Types.projectfile_path(pkgdir(m)))
+pkgversion(m::Core.Module) = pkgproject(m).version
+# const ACE1_VERSION_NUMBER = pkgversion(@__MODULE__())
+
 # external imports that are useful for all submodules
 include("extimports.jl")
 
@@ -42,6 +48,8 @@ include("rpi/rpi.jl")
 # pair potentials + repulsion
 include("pairpots/pair.jl");
 @reexport using ACE1.PairPotentials
+
+include("committee.jl")
 
 # lots of stuff related to random samples:
 #  - random configurations

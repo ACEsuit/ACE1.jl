@@ -24,11 +24,12 @@ export PIPotential
 `struct PIPotential` : specifies a PIPotential, which is basically defined
 through a PIBasis and its coefficients
 """
-mutable struct PIPotential{T, NZ, TPI, TEV} <: SitePotential
+mutable struct PIPotential{T, NZ, TPI, TEV, NCO} <: SitePotential
    pibasis::TPI
    coeffs::NTuple{NZ, Vector{T}}
    dags::NTuple{NZ, CorrEvalGraph{T, Int}}
    evaluator::TEV
+   committee::Union{Nothing, NTuple{NZ, Vector{SVector{NCO, T}}}}
 end
 
 cutoff(V::PIPotential) = cutoff(V.pibasis)
@@ -49,6 +50,9 @@ standardevaluator(V::PIPotential) =
 
 maxorder(V::PIPotential) = maxorder(V.pibasis)
 
+ncommittee(V::PIPotential{T, NZ, TPI, TEV, NCO}) where {T, NZ, TPI, TEV, NCO} = 
+   isnothing(V.committee) ? 0 : NCO 
+
 # ------------------------------------------------------------
 #   Initialisation code
 # ------------------------------------------------------------
@@ -57,15 +61,21 @@ combine(basis::PIBasis, coeffs::AbstractVector) =
       PIPotential(basis, identity.(collect(coeffs)))
 
 # assemble from basis with global coeff vector
-function PIPotential(basis::PIBasis, coeffs::Vector{<: Number})
+function PIPotential(basis::PIBasis, coeffs::Vector{<: Number}, committee::Nothing = nothing)
    coeffs_t = ntuple(iz0 -> coeffs[basis.inner[iz0].AAindices], numz(basis))
    return PIPotential(basis, coeffs_t)
 end
 
 # assemble from basis with coeff vectors separated into individual species
-function PIPotential(basis::PIBasis, coeffs_t::Tuple)
+function PIPotential(basis::PIBasis, coeffs_t::Tuple, committee::Nothing = nothing)
    dags = ntuple(iz0 -> _getdagfrombasis(basis.inner[iz0], coeffs_t[iz0]), numz(basis))
    return PIPotential(basis, coeffs_t, dags, DAGEvaluator())
+end
+
+function PIPotential(basis::TPI, coeffs_t::NTuple{NZ, Vector{T}}, 
+                     dags::Tuple, evaluator::TEV
+                     ) where {NZ ,T, TPI <: PIBasis, TEV} 
+   return PIPotential{T, NZ, TPI, TEV, 0}(basis, coeffs_t, dags, evaluator, nothing)
 end
 
 function _getdagfrombasis(inner, c)
@@ -130,9 +140,11 @@ end
 # ------------------------------------------------------------
 
 write_dict(V::PIPotential) = Dict(
-      "__id__" => "ACE1_PIPotential",
-     "pibasis" => write_dict(V.pibasis),
-      "coeffs" => [ write_dict.(V.coeffs)... ] )
+        "__id__" => "ACE1_PIPotential",
+        "meta" => Dict("ACE1_version" => pkgversion(ACE1)),
+       "pibasis" => write_dict(V.pibasis),
+        "coeffs" => [ write_dict.(V.coeffs)... ], 
+     "committee" => write_committee(V.committee) )
 
 #    if ntests > 0
 #       tests = ACE1.Random.rand_nhd(Nat, J::ScalarBasis, species = :X)
@@ -148,10 +160,10 @@ write_dict(V::PIPotential) = Dict(
 #    return D
 # end
 
-read_dict(::Val{:ACE1_PIPotential}, D::Dict; tests = true) =
+read_dict(::Val{:ACE1_PIPotential}, D::Dict; tests = true)  = 
    PIPotential( read_dict(D["pibasis"]),
-                tuple( read_dict.( D["coeffs"] )... ) )
-
+                tuple( read_dict.( D["coeffs"] )... ), 
+                read_committee( D["committee"] ) )
 
 # function test_compat(V::PIPotential, rtests, tests)
 #
@@ -252,17 +264,6 @@ function evaluate_d!(dEs, tmpd, V::PIPotential, ::StandardEvaluator,
          iAα = inner.iAA2iA[iAA, α]
          dAco[iAα] += c_ * dAAt[α]
       end
-
-      # for α = 1:inner.orders[iAA]
-      #    CxA_α = c[iAA]
-      #    for β = 1:inner.orders[iAA]
-      #       if β != α
-      #          CxA_α *= A[inner.iAA2iA[iAA, β]]
-      #       end
-      #    end
-      #    iAα = inner.iAA2iA[iAA, α]
-      #    dAco[iAα] += CxA_α
-      # end
    end
 
    # stage 3: get the gradients

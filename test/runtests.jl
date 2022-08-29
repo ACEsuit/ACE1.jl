@@ -21,8 +21,8 @@ using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
     # --------------------------------------------
     # core permutation-invariant functionality
     @testset "1-Particle Basis"  begin include("test_1pbasis.jl") end 
-    include("test_pibasis.jl")
-    include("test_pipot.jl")
+    @testset "PIBasis"  begin include("test_pibasis.jl") end 
+    @testset "PIPotential"  begin include("test_pipot.jl") end 
 
     # ------------------------
     #   rotation_invariance
@@ -41,6 +41,7 @@ using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
     # TODO: These tests are current failing - should be re-examined and fixed 
     # include("compat/test_compat.jl")
 
+    @testset "Committee" begin include("test_committee.jl") end 
     include("test_any.jl")
     include("polynomials/test_multitrans.jl")
 end
