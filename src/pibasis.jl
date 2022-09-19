@@ -233,6 +233,9 @@ function PIBasis(basis1p::OneParticleBasis,
 end
 
 
+ACE1.get_basis_spec(basis::ACE1.PIBasis, iz0::Integer) = 
+     [ ACE1.get_basis_spec(basis, iz0, i) for i = 1:length(basis.inner[iz0])  ]
+
 
 # TODO: instead of copying zlist, maybe forward the zlist methods
 

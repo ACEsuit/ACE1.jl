@@ -21,7 +21,7 @@ using ACE1.Testing: println_slim
 @info("Basic test of PIBasis construction and evaluation")
 
 ord = 5
-maxdeg = 10
+maxdeg = 10 
 r0 = 1.0
 rcut = 3.0
 trans = PolyTransform(1, r0)

@@ -85,8 +85,12 @@ function get_nl(basis::RPIBasis)
          # find one of the indices of the PI basis that the current
          # RPI basis function belongs to; they are all equivalent in
          # terms of correlation-order, so only one of them matters.
-         iPI = findfirst(basis.A2Bmaps[iz0][ib,:] .!= 0)
-         nnll[_basisfcnidx(basis, iz0, ib)] = nnll_pi[iPI]
+         iPI = findlast(basis.A2Bmaps[iz0][ib,:] .!= 0)
+         if isnothing(iPI)
+            nnll[_basisfcnidx(basis, iz0, ib)] = []
+         else 
+            nnll[_basisfcnidx(basis, iz0, ib)] = nnll_pi[iPI]
+         end
       end
    end
    return nnll
