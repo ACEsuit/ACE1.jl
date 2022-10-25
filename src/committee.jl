@@ -504,11 +504,26 @@ end
 
 # -----------------  IPCOllection
 
-# using JuLIP.MLIPs: IPCollection
+using JuLIP.MLIPs: SumIP
 
-# energy(coll::IPCollection, at::AbstractAtoms) =
-#          [ energy(B, at) for B in coll.coll ]
-# forces(coll::IPCollection, at::AbstractAtoms) =
-#          [ forces(B, at) for B in coll.coll ]
-# virial(coll::IPCollection, at::AbstractAtoms) =
-#          [ virial(B, at) for B in coll.coll ]
+# energy(sumip::SumIP, at::AbstractAtoms; kwargs...) =
+#          sum(energy(calc, at; kwargs...) for calc in sumip.components)
+# forces(sumip::SumIP, at::AbstractAtoms; kwargs...) =
+#          sum(forces(calc, at; kwargs...) for calc in sumip.components)
+# virial(sumip::SumIP, at::AbstractAtoms; kwargs...) =
+#          sum(virial(calc, at; kwargs...) for calc in sumip.components)
+
+function co_energy(V::SumIP, at::AbstractAtoms; kwargs...)
+   ee = [ co_energy(calc, at; kwargs...) for calc in V.components ]
+   return sum( e[1] for e in ee ), sum( e[2] for e in ee )
+end
+
+function co_forces(V::SumIP, at::AbstractAtoms; kwargs...)
+   ff = [ co_forces(calc, at; kwargs...) for calc in V.components ]
+   return sum( f[1] for f in ff ), sum( f[2] for f in ff )
+end
+
+function co_virial(V::SumIP, at::AbstractAtoms; kwargs...)
+   vv = [ co_virial(calc, at; kwargs...) for calc in V.components ]
+   return sum( v[1] for v in vv ), sum( v[2] for v in vv )
+end
