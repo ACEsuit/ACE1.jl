@@ -210,21 +210,21 @@ end
 #   surely we can do this more generally ... 
 
 using Base.Threads: nthreads, threadid, @threads
-using JuLIP: neighbourlist, maxneigs
+using JuLIP: neighbourlist, maxneigs, AbstractCalculator
 using JuLIP.Potentials: neigsz!, site_virial
 
-function co_energy(V::PIPotential, at::AbstractAtoms)
+function co_energy(V::AbstractCalculator, at::AbstractAtoms)
    assert_has_co(V)
    nt = nthreads()
    NCO = ncommittee(V)
    T = fltype(V)
    tmp = [ alloc_temp(V, at) for _ in 1:nt ]
    E = [ zero(T) for _ in 1:nt ]
-   co_E = [ zero(SVector{NCO, fltype(V)}) for _=1:nt ]
+   co_E = [ zero(SVector{NCO, T}) for _=1:nt ]
    return co_energy!(E, co_E, tmp, V, at)
 end
 
-function co_energy!(E, co_E, tmp, V, at)
+function co_energy!(E, co_E, tmp, V::PIPotential, at)
    assert_has_co(V)
    NCO = ncommittee(V)
    nt = nthreads() 
@@ -246,7 +246,7 @@ end
 # ------------------------------------------------------------
 #   Total forces
 
-function co_forces(V::PIPotential, at::AbstractAtoms)
+function co_forces(V::AbstractCalculator, at::AbstractAtoms)
    assert_has_co(V)
    nt = nthreads()
    NCO = ncommittee(V)
@@ -254,11 +254,11 @@ function co_forces(V::PIPotential, at::AbstractAtoms)
    tmp_d = [ alloc_temp_d(V, at) for _ in 1:nt ]
    F0 = zeros(JVec{T}, length(at))
    F = [ copy(F0) for _ in 1:nt ]
-   co_F = [ SVector(ntuple(_ -> copy(F0), NCO)...) for _ in 1:nt ] 
+   co_F = [ SVector(ntuple(_ -> copy(F0), NCO)...) for _ in 1:nt ]
    return co_forces!(F, co_F, tmp_d, V, at)
 end
 
-function co_forces!(F, co_F, tmp_d, V, at)
+function co_forces!(F, co_F, tmp_d, V::PIPotential, at)
    assert_has_co(V)
    NCO = ncommittee(V)
    T = fltype(V)
@@ -296,7 +296,7 @@ end
 # ------------------------------------------------------------
 #   Virial 
 
-function co_virial(V::PIPotential, at::AbstractAtoms)
+function co_virial(V::AbstractCalculator, at::AbstractAtoms)
    assert_has_co(V)
    nt = nthreads()
    NCO = ncommittee(V)
@@ -308,7 +308,7 @@ function co_virial(V::PIPotential, at::AbstractAtoms)
    return co_virial!(vir, co_vir, tmp_d, V, at)
 end
 
-function co_virial!(vir, co_vir, tmp_d, V, at)
+function co_virial!(vir, co_vir, tmp_d, V::PIPotential, at)
    assert_has_co(V)
    NCO = ncommittee(V)
    T = fltype(V)
@@ -335,3 +335,90 @@ function co_virial!(vir, co_vir, tmp_d, V, at)
    end 
    return sum(vir), SVector(sum(co_vir))
 end
+
+
+
+# ------------------------------------------------------------
+#    Pair Potential Committee 
+
+using ACE1.PairPotentials: PolyPairBasis, PolyPairPot
+
+
+function committee_potential(basis::PolyPairBasis, 
+                             c::AbstractVector, 
+                             co_c::AbstractMatrix)
+
+   @assert length(c) == size(co_c, 1)                             
+   NCO = size(co_c, 2)
+   T = eltype(co_c)
+
+   co_c2 = [ SVector{NCO, T}(co_c[i, :]...) for i = 1:length(c) ]
+
+   return PolyPairPot(c, basis, co_c2)
+end
+
+
+function assert_has_co(V::PolyPairPot) 
+   if ncommittee(V) == 0
+      error("No committee found in potential")
+   end
+   return nothing 
+end
+
+
+
+function co_energy!(E, co_E, tmp, V::PolyPairPot, at)
+   assert_has_co(V)
+   NCO = ncommittee(V)
+   nt = nthreads() 
+   @assert nt == length(tmp) == length(E) == length(co_E) 
+   @assert all(length(co_E[i]) == NCO for i in 1:nt)
+   nlist = neighbourlist(at, cutoff(V))
+   @threads for i = 1:length(at) 
+      tid = threadid() 
+      z0 = at.Z[i] 
+      Js, Rs, Zs = neigsz!(tmp[tid], nlist, at, i)
+      for (j, rr, z) in zip(Js, Rs, Zs)
+         r = norm(rr)
+         v, v_co = co_evaluate!(tmp[tid], V, r, z, z0)
+         E[tid] += v/2
+         co_E[tid] += v_co/2
+      end
+   end
+   return sum(E), sum(co_E)
+end
+
+function _dot_zij_co(V, B, z, z0)
+   i0 = ACE1.PairPotentials._Bidx0(V.basis, z, z0)  # cf. pair_basis.jl
+   return sum( V.committee[i0 + n] * B[n]  for n = 1:length(V.basis, z, z0) )
+end
+
+function co_evaluate!(tmp, V::PolyPairPot, r::Number, z, z0) 
+   Iz = z2i(V, z)
+   Iz0 = z2i(V, z0)
+   evaluate!(tmp.J[Iz, Iz0], tmp.tmp_J[Iz, Iz0], V.basis.J[Iz, Iz0], r, z, z0)  
+   v = ACE1.PairPotentials._dot_zij(V, tmp.J[Iz, Iz0], z, z0)
+   v_co = _dot_zij_co(V, tmp.J[Iz, Iz0], z, z0)
+   return v, v_co
+end
+
+
+
+
+# function evaluate!(tmp, V::PairPotential,
+#    R::AbstractVector{JVec{T}}, Z, z0) where {T}
+# Es = zero(T)
+# for i = 1:length(R)
+# Es += T(0.5) * evaluate!(tmp, V, norm(R[i]), Z[i], z0)
+# end
+# return Es
+# end
+
+# function evaluate_d!(dEs, tmp, V::PairPotential,
+#      R::AbstractVector{JVec{T}}, Z, z0) where {T}
+# for i = 1:length(R)
+# r = norm(R[i])
+# dEs[i] = (T(0.5) * evaluate_d!(tmp, V, r, Z[i], z0) / r) * R[i]
+# end
+# return dEs
+# end

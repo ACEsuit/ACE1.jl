@@ -9,11 +9,13 @@
 
 # ----------------------------------------------------
 
+using StaticArrays: SVector 
 export PolyPairPot
 
-struct PolyPairPot{T,TJ,NZ} <: PairPotential
+struct PolyPairPot{T,TJ,NZ, NCO} <: PairPotential
    coeffs::Vector{T}
    basis::PolyPairBasis{TJ, NZ}
+   committee::Union{Nothing, Vector{SVector{NCO, T}}}
 end
 
 @pot PolyPairPot
@@ -21,7 +23,13 @@ end
 PolyPairPot(pB::PolyPairBasis, coeffs::Vector) = PolyPairPot(coeffs, pB)
 
 JuLIP.MLIPs.combine(pB::PolyPairBasis, coeffs::AbstractVector) =
-            PolyPairPot(identity.(collect(coeffs)), pB)
+            PolyPairPot(identity.(collect(coeffs)), pB, nothing)
+
+function PolyPairPot(coeffs_t::Vector{T}, basis::PolyPairBasis{TJ, NZ}, 
+                     committee::Nothing = nothing) where {TJ, NZ, T}
+   return PolyPairPot{T, TJ, NZ, 0}(coeffs_t, basis, nothing)                      
+end
+               
 
 JuLIP.cutoff(V::PolyPairPot) = cutoff(V.basis)
 
@@ -41,6 +49,13 @@ write_dict(V::PolyPairPot{T}) where {T} = Dict(
 
 read_dict(::Val{:ACE1_PolyPairPot}, D::Dict, T = read_dict(D["T"])) =
       PolyPairPot(read_dict(D["basis"]), T.(D["coeffs"]))
+
+
+import ACE1
+ACE1.ncommittee(V::PolyPairPot{T, TJ, NZ, NCO}) where {T,TJ,NZ, NCO} = 
+                  isnothing(V.committee) ? 0 : NCO 
+
+# ----- allocation and evaluation codes       
 
 
 alloc_temp(V::PolyPairPot{T}, N::Integer) where {T} =
