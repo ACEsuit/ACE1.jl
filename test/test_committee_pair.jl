@@ -17,8 +17,7 @@ using Statistics: mean
 using ACE1.Testing: println_slim
 
 
-randr() = 1.0 + rand()
-randcoeffs(B) = rand(length(B)) .* (1:length(B)).^(-2)
+_randcoeffs_pair(B) = rand(length(B)) .* (1:length(B)).^(-2)
 
 ##
 
@@ -31,7 +30,7 @@ Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
 pB = ACE1.PairPotentials.PolyPairBasis(Pr, :W)
 
 NCO = 12 
-co_c = hcat([randcoeffs(pB) for i = 1:NCO]...)
+_co_c_pair = hcat([randcoeffs(pB) for i = 1:NCO]...)
 coeffs = vec(sum(co_c, dims=2) / NCO)
 
 V = combine(pB, coeffs)

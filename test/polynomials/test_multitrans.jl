@@ -188,8 +188,8 @@ using StaticArrays
 Nat = 15
 z0 = zFe 
 Zs = rand([zFe, zC, zAl], Nat)
-randr = () -> (r = 2.3 + 2.5 * rand(); x = randn(SVector{3, Float64}); x/r)
-Rs = [ randr() for _=1:Nat ]
+_randr1 = () -> (r = 2.3 + 2.5 * rand(); x = randn(SVector{3, Float64}); x/r)
+Rs = [ _randr1() for _=1:Nat ]
 
 B1 = evaluate(rpibasis, Rs, Zs, z0)
 dB1 = evaluate_d(rpibasis, Rs, Zs, z0)

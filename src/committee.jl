@@ -501,3 +501,14 @@ function co_virial!(vir, co_vir, tmp_d, V::PolyPairPot, at)
    return sum(vir), SVector(sum(co_vir))
 end
 
+
+# -----------------  IPCOllection
+
+# using JuLIP.MLIPs: IPCollection
+
+# energy(coll::IPCollection, at::AbstractAtoms) =
+#          [ energy(B, at) for B in coll.coll ]
+# forces(coll::IPCollection, at::AbstractAtoms) =
+#          [ forces(B, at) for B in coll.coll ]
+# virial(coll::IPCollection, at::AbstractAtoms) =
+#          [ virial(B, at) for B in coll.coll ]

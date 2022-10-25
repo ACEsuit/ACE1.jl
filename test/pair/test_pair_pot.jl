@@ -6,7 +6,6 @@
 # --------------------------------------------------------------------------
 
 
-@testset "PolyPairPot" begin
 
 @info("--------------- PolyPairPot Implementation ---------------")
 
@@ -18,8 +17,8 @@ using JuLIP: evaluate, evaluate_d
 using JuLIP.Potentials: i2z, numz
 using JuLIP.MLIPs: combine
 
-randr() = 1.0 + rand()
-randcoeffs(B) = rand(length(B)) .* (1:length(B)).^(-2)
+# randr() = 1.0 + rand()
+_randcoeffs_pair(B) = rand(length(B)) .* (1:length(B)).^(-2)
 
 ##
 
@@ -30,7 +29,7 @@ rcut = 3.0
 trans = PolyTransform(1, r0)
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
 pB = ACE1.PairPotentials.PolyPairBasis(Pr, :W)
-coeffs = randcoeffs(pB)
+coeffs = _randcoeffs_pair(pB)
 V = combine(pB, coeffs)
 
 
@@ -45,7 +44,7 @@ energy(V, at)
 
 @info("Testing correctness of `PolyPairPot` against `PolyPairBasis`")
 @info("    test `combine`")
-coeffs = randcoeffs(pB)
+coeffs = _randcoeffs_pair(pB)
 V = combine(pB, coeffs)
 println(@test energy(V, at) ≈ sum(V.coeffs .*  energy(pB, at)))
 
@@ -56,7 +55,7 @@ println(@test all(JuLIP.Testing.test_fio(V)))
 @info("      check that PolyPairBasis ≈ PolyPairPot")
 for ntest = 1:10
    rattle!(at, 0.01)
-   coeffs = randcoeffs(pB)
+   coeffs = _randcoeffs_pair(pB)
    V = combine(pB, coeffs)
 
    E_V = energy(V, at)
@@ -81,4 +80,4 @@ rattle!(at, 0.03)
 println(@test JuLIP.Testing.fdtest(V, at))
 
 ##
-end
+

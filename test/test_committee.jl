@@ -62,6 +62,7 @@ for i in 1:NCO
    print_tf(@test( evaluate(co_V, Rs, Zs, z0) ≈ co_val[i] ))
    print_tf(@test( evaluate_d(co_V, Rs, Zs, z0) ≈ co_dEs[i] ))
 end
+println()
 co_V.coeffs[iz0][:] .= _c0[:]
 
 ## next up total energy, forces, virials 
@@ -97,6 +98,7 @@ for i in 1:NCO
    print_tf(@test( forces(co_V, at) ≈ co_F[i] ))
    print_tf(@test( virial(co_V, at) ≈ co_vir[i] ))
 end
+println()
 co_V.coeffs[iz0][:] .= _c0[:]
 
 ## 

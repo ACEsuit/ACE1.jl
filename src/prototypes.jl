@@ -76,3 +76,11 @@ diagonal_regulariser(basis; diff = 0) = Diagonal(scaling(basis, diff))
 every scalar basis must implement this
 """
 function rand_radial end
+
+# committee stuff 
+
+function write_committee end 
+function read_committee end 
+function co_energy end 
+function co_forces end 
+function co_virial end 
