@@ -75,6 +75,17 @@ function read_committee(committee::Union{AbstractVector, Tuple})
    return _read_committee(committee, SVector{NCO, T}, Val(NZ))
 end
 
+write_committee(committee::Vector{<: StaticVector}) = 
+            write_dict(collect(mat(committee)'))
+
+function read_committee(committee::Dict) 
+   co = read_dict(committee)
+   @assert co isa AbstractMatrix 
+   NCO = size(co, 2)
+   T = eltype(co)
+   return [ SVector{NCO, T}(co[i, :]) for i in 1:size(co, 1) ]
+end
+
 
 # ------------------------------------------------------------
 #   Site energy
@@ -366,6 +377,41 @@ function assert_has_co(V::PolyPairPot)
 end
 
 
+"""
+return the coefficients for committee member i with center atom species z0.
+"""
+function get_committee_coeffs(V::PolyPairPot, ico::Integer)
+   return [ x[ico] for x in V.committee ]
+end
+
+
+
+function _dot_zij_co(V, B, z, z0)
+   i0 = ACE1.PairPotentials._Bidx0(V.basis, z, z0)  # cf. pair_basis.jl
+   return sum( V.committee[i0 + n] * B[n]  for n = 1:length(V.basis, z, z0) )
+end
+
+function co_evaluate!(tmp, V::PolyPairPot, r::Number, z, z0) 
+   Iz = z2i(V, z)
+   Iz0 = z2i(V, z0)
+   evaluate!(tmp.J[Iz, Iz0], tmp.tmp_J[Iz, Iz0], V.basis.J[Iz, Iz0], r, z, z0)  
+   v = ACE1.PairPotentials._dot_zij(V, tmp.J[Iz, Iz0], z, z0)
+   v_co = _dot_zij_co(V, tmp.J[Iz, Iz0], z, z0)
+   return v, v_co
+end
+
+
+function co_evaluate_d!(tmp, V::PolyPairPot, r::Number, z, z0) 
+   Iz = z2i(V, z)
+   Iz0 = z2i(V, z0)
+   evaluate_d!(tmp.J[Iz, Iz0], tmp.dJ[Iz, Iz0], tmp.tmpd_J[Iz, Iz0], 
+               V.basis.J[Iz, Iz0], r, z, z0)
+   dv = ACE1.PairPotentials._dot_zij(V, tmp.dJ[Iz, Iz0], z, z0)
+   co_dv = _dot_zij_co(V, tmp.dJ[Iz, Iz0], z, z0)
+   return dv, co_dv
+end
+
+
 
 function co_energy!(E, co_E, tmp, V::PolyPairPot, at)
    assert_has_co(V)
@@ -388,37 +434,70 @@ function co_energy!(E, co_E, tmp, V::PolyPairPot, at)
    return sum(E), sum(co_E)
 end
 
-function _dot_zij_co(V, B, z, z0)
-   i0 = ACE1.PairPotentials._Bidx0(V.basis, z, z0)  # cf. pair_basis.jl
-   return sum( V.committee[i0 + n] * B[n]  for n = 1:length(V.basis, z, z0) )
+
+function co_forces!(F, co_F, tmp_d, V::PolyPairPot, at)
+   assert_has_co(V)
+   NCO = ncommittee(V)
+   T = fltype(V)
+   nt = nthreads() 
+   @assert nt == length(tmp_d) == length(F) == length(co_F)
+   @assert all(length(co_F[i]) == NCO for i in 1:nt)
+   nlist = neighbourlist(at, cutoff(V))
+
+   for i = 1:length(at) 
+      tid = threadid() 
+      z0 = at.Z[i] 
+      Js, Rs, Zs = neigsz!(tmp_d[tid], nlist, at, i)
+      for (j, rr, z) in zip(Js, Rs, Zs)
+         r = norm(rr)
+         r̂ = rr/r
+         dv, co_dv = co_evaluate_d!(tmp_d[tid], V, r, z, z0)
+
+         F[tid][j] -= 0.5 * dv * r̂
+         F[tid][i] += 0.5 * dv * r̂
+         for ico = 1:NCO
+            co_F[tid][ico][j] -= 0.5 * co_dv[ico] * r̂
+            co_F[tid][ico][i] += 0.5 * co_dv[ico] * r̂
+         end
+      end
+   end
+   return sum(F), sum(co_F)
 end
 
-function co_evaluate!(tmp, V::PolyPairPot, r::Number, z, z0) 
-   Iz = z2i(V, z)
-   Iz0 = z2i(V, z0)
-   evaluate!(tmp.J[Iz, Iz0], tmp.tmp_J[Iz, Iz0], V.basis.J[Iz, Iz0], r, z, z0)  
-   v = ACE1.PairPotentials._dot_zij(V, tmp.J[Iz, Iz0], z, z0)
-   v_co = _dot_zij_co(V, tmp.J[Iz, Iz0], z, z0)
-   return v, v_co
+
+function co_virial!(vir, co_vir, tmp_d, V::PolyPairPot, at)
+   assert_has_co(V)
+   NCO = ncommittee(V)
+   T = fltype(V)
+   nt = nthreads() 
+   @assert nt == length(tmp_d) == length(vir) == length(co_vir)
+   @assert all(length(co_vir[i]) == NCO for i in 1:nt)
+   nlist = neighbourlist(at, cutoff(V))
+
+   dV0 = zeros(SVector{3, T}, maxneigs(nlist))
+   dV = [ copy(dV0) for _ in 1:nt ]
+   co_dV = [ MVector(ntuple(_ -> copy(dV0), NCO)...) for _ in 1:nt ]
+
+   @threads for i = 1:length(at) 
+      tid = threadid() 
+      z0 = at.Z[i] 
+      Js, Rs, Zs = neigsz!(tmp_d[tid], nlist, at, i)
+   
+      for (a, (j, rr, z)) in enumerate( zip(Js, Rs, Zs) )
+         r = norm(rr)
+         r̂ = rr/r
+         dv, co_dv = co_evaluate_d!(tmp_d[tid], V, r, z, z0)
+         dV[tid][a] = 0.5 * dv * r̂
+         for ico = 1:NCO
+            co_dV[tid][ico][a] = 0.5 * co_dv[ico] * r̂
+         end
+      end
+
+      vir[tid] += site_virial(dV[tid], Rs)
+      for ico = 1:NCO
+         co_vir[tid][ico] += site_virial(co_dV[tid][ico], Rs)
+      end
+   end 
+   return sum(vir), SVector(sum(co_vir))
 end
 
-
-
-
-# function evaluate!(tmp, V::PairPotential,
-#    R::AbstractVector{JVec{T}}, Z, z0) where {T}
-# Es = zero(T)
-# for i = 1:length(R)
-# Es += T(0.5) * evaluate!(tmp, V, norm(R[i]), Z[i], z0)
-# end
-# return Es
-# end
-
-# function evaluate_d!(dEs, tmp, V::PairPotential,
-#      R::AbstractVector{JVec{T}}, Z, z0) where {T}
-# for i = 1:length(R)
-# r = norm(R[i])
-# dEs[i] = (T(0.5) * evaluate_d!(tmp, V, r, Z[i], z0) / r) * R[i]
-# end
-# return dEs
-# end

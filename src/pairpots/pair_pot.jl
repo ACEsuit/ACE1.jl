@@ -11,6 +11,7 @@
 
 using StaticArrays: SVector 
 export PolyPairPot
+import ACE1: write_committee, read_committee
 
 struct PolyPairPot{T,TJ,NZ, NCO} <: PairPotential
    coeffs::Vector{T}
@@ -20,7 +21,8 @@ end
 
 @pot PolyPairPot
 
-PolyPairPot(pB::PolyPairBasis, coeffs::Vector) = PolyPairPot(coeffs, pB)
+PolyPairPot(pB::PolyPairBasis, coeffs::Vector, committee=nothing) = 
+            PolyPairPot(coeffs, pB, committee)
 
 JuLIP.MLIPs.combine(pB::PolyPairBasis, coeffs::AbstractVector) =
             PolyPairPot(identity.(collect(coeffs)), pB, nothing)
@@ -44,12 +46,13 @@ write_dict(V::PolyPairPot{T}) where {T} = Dict(
       "__id__" => "ACE1_PolyPairPot",
       "T" => write_dict(T),
       "coeffs" => V.coeffs,
-      "basis" => write_dict(V.basis)
+      "basis" => write_dict(V.basis), 
+      "committee" => write_committee(V.committee)
       )
 
 read_dict(::Val{:ACE1_PolyPairPot}, D::Dict, T = read_dict(D["T"])) =
-      PolyPairPot(read_dict(D["basis"]), T.(D["coeffs"]))
-
+      PolyPairPot(read_dict(D["basis"]), T.(D["coeffs"]), 
+                  read_committee(D["committee"]))
 
 import ACE1
 ACE1.ncommittee(V::PolyPairPot{T, TJ, NZ, NCO}) where {T,TJ,NZ, NCO} = 
