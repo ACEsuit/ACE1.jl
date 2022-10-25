@@ -91,7 +91,7 @@ function set_Aindices!(basis::OneParticleBasis)
 end
 
 get_basis_spec(basis::OneParticleBasis, iz0::Integer) =
-      get_basis_spec(basis, i2z(iz0))
+      get_basis_spec(basis, i2z(basis, iz0))
 
 get_basis_spec(basis::OneParticleBasis, s::Symbol) =
       get_basis_spec(basis, atomic_number(s))

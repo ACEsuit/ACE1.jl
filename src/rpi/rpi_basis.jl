@@ -67,13 +67,18 @@ function get_orders(basis::RPIBasis)
    return Ns
 end
 
-function get_nl(basis::RPIBasis)
+function get_nl(basis::RPIBasis, usez=true)
+   if usez 
+      oneps2nt = b -> (z=b.z, n=b.n, l=b.l) 
+   else 
+      oneps2nt = b -> (n=b.n, l=b.l) 
+   end
    # get the correlation orders of the PIbasis ...
    nnll_pi = Vector{Vector{Any}}(undef, length(basis.pibasis))
    for iz0 = 1:numz(basis)
       inner = basis.pibasis.inner[iz0]
       for (key, val) in inner.b2iAA
-         b = [ (l = b.l, n = b.n) for b in key.oneps ]
+         b = [ oneps2nt(b) for b in key.oneps ]
          nnll_pi[inner.AAindices[val]] = b
       end
    end
