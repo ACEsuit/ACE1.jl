@@ -1,7 +1,5 @@
 # ACE1.jl
 
-**WARNING - HISTORY REWRITE : we just rewrote the `ACE1.jl` history. Ideally, this should change nothing for users! If you run into any problems please first try to remove ACE1.jl from your project and then add it again. If that still fails, then please discuss it in [this issue](https://github.com/ACEsuit/ACE1.jl/issues/39)**
-
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ACEsuit.github.io/ACE1docs.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://ACEsuit.github.io/ACE1docs.jl/dev)
 
