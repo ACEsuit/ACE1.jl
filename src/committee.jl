@@ -25,10 +25,15 @@ implemented.
 function committee_potential(basis::RPIBasis, 
                              c::AbstractVector, 
                              co_c::AbstractMatrix)
+   if !(size(co_c, 1) == length(c) == length(basis))
+      error("""cofficient arrays don't match the basis size; 
+               need `length(c) == size(co_c,1) == length(basis)`""")
+   end
+                        
    NZ = numz(basis.pibasis)
    NCO = size(co_c, 2)
    T = eltype(co_c)
-
+   
    c_pi = get_picoeffs(basis, c)
    # convert committee coefficients first to a tuple of matrices ... 
    co_c_pi_pre = ntuple(iz0 -> basis.A2Bmaps[iz0]' * co_c[basis.Bz0inds[iz0], :],
@@ -359,7 +364,11 @@ function committee_potential(basis::PolyPairBasis,
                              c::AbstractVector, 
                              co_c::AbstractMatrix)
 
-   @assert length(c) == size(co_c, 1)                             
+   if !(length(c) == size(co_c, 1) == length(basis))
+      error("""cofficient arrays don't match the basis size; 
+               need `length(c) == size(co_c,1) == length(basis)`""")
+   end
+
    NCO = size(co_c, 2)
    T = eltype(co_c)
 
