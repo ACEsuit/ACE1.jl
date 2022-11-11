@@ -536,3 +536,33 @@ function co_virial(V::SumIP, at::AbstractAtoms; kwargs...)
    vv = [ co_virial(calc, at; kwargs...) for calc in V.components ]
    return sum( v[1] for v in vv ), sum( v[2] for v in vv )
 end
+
+
+# ------------------------------------------------------------
+#    One Body Committee 
+
+using JuLIP: OneBody
+
+struct FlexConstTensor{T} 
+   v::T 
+end
+
+import Base: +
+
++(a::FlexConstTensor, b::AbstractArray) = b .+ Ref(a.v)
++(b::AbstractArray, a::FlexConstTensor) = b .+ Ref(a.c)
+
+function co_energy(V::OneBody, at::AbstractAtoms; kwargs...)
+   E = energy(V, at) 
+   return E, FlexConstTensor(E)
+end
+
+function co_forces(V::OneBody, at::AbstractAtoms; kwargs...)
+   F = forces(V, at)
+   return F, FlexConstTensor(F)
+end
+
+function co_virial(V::OneBody, at::AbstractAtoms; kwargs...)
+   vir = virial(V, at)
+   return vir, FlexConstTensor(vir)
+end

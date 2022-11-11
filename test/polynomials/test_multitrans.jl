@@ -56,7 +56,7 @@ trans = multitransform(transforms, rin = rin, rcut = rcut)
 
 xmin = 1e30; xmax = - 1e30 
 for ntest = 1:100
-   local r, z0 
+   local r, z0, z
    r = rin + rand() * (rcut - rin)
    z, z0 = (rand([zFe, zC, zAl], 2)...,)
    x = transform(trans, r, z, z0)
@@ -88,7 +88,7 @@ trans2 = multitransform(transforms, cutoffs=cutoffs)
 
 xmin = 1e30; xmax = - 1e30 
 for ntest = 1:100
-   local rin, rcut , z0, s, r 
+   local rin, rcut , z0, s, r, z 
    z, z0 = (rand([zFe, zC, zAl], 2)...,)
    s, s0 = chemical_symbol.((z, z0))
    rin, rcut = try 
@@ -154,7 +154,7 @@ println_slim(@test (try
 
 @info("some random finite-difference tests")
 for ntest = 1:30 
-   local r, z0 
+   local r, z0, z, F  
    r = 2 + rand() 
    z, z0 = (rand([zFe, zC, zAl], 2)...,)
    P = evaluate(B, r, z, z0)

@@ -144,3 +144,29 @@ vir1 = virial(V_comb, at)
 vir2, co_vir = ACE1.co_virial(co_V_comb, at)
 println_slim(@test (vir1 ≈ vir2 ≈ mean(co_vir)))
 println_slim(@test co_vir ≈ ACE1.co_virial(co_V, at)[2] + ACE1.co_virial(co_Vace, at)[2])
+
+
+## 
+
+@info("check OneBody committee behaviour") 
+
+V1 = JuLIP.OneBody(:W => randn())
+co_V_comb1 = JuLIP.MLIPs.SumIP(V1, co_Vace, co_V)
+
+@info("    ... energy")
+E1, co_E1 = ACE1.co_energy(co_V_comb, at)
+E2, co_E2 = ACE1.co_energy(co_V_comb1, at)
+println_slim(@test E2 ≈ E1 + energy(V1, at))
+println_slim(@test co_E1 .+ energy(V1, at) ≈ co_E2)
+
+@info("    ... forces")
+F1, co_F1 = ACE1.co_forces(co_V_comb, at)
+F2, co_F2 = ACE1.co_forces(co_V_comb1, at)
+println_slim(@test F2 ≈ F1)
+println_slim(@test co_F1 ≈ co_F2)
+
+@info("    ... virials")
+vir1, co_vir1 = ACE1.co_virial(co_V_comb, at)
+vir2, co_vir2 = ACE1.co_virial(co_V_comb1, at)
+println_slim(@test vir2 ≈ vir1)
+println_slim(@test co_vir1 ≈ co_vir2)
