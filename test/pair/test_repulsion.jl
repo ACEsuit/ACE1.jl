@@ -7,7 +7,7 @@
 
 
 
-@testset "RepulsiveCore" begin
+
 
 #---
 
@@ -17,8 +17,8 @@ using JuLIP: evaluate, evaluate_d
 using JuLIP.Potentials: i2z, numz
 using JuLIP.MLIPs: combine
 
-randr() = 1.0 + rand()
-randcoeffs(B) = (rand(length(B)) .* (1:length(B)) .- 0.2).^(-2)
+# randr() = 1.0 + rand()
+_randcoeffs_pair(B) = (rand(length(B)) .* (1:length(B)) .- 0.2).^(-2)
 
 
 #---
@@ -35,7 +35,7 @@ rcut = 3.0
 
 Pr = transformed_jacobi(maxdeg, PolyTransform(1, r0), rcut; pcut = 2)
 pB = ACE1.PairPotentials.PolyPairBasis(Pr, :W)
-coeffs = randcoeffs(pB)
+coeffs = _randcoeffs_pair(pB)
 V = combine(pB, coeffs)
 
 #--- try out the repulsive potential
@@ -69,7 +69,7 @@ r0 = rnn(:W)
 
 Pr = transformed_jacobi(maxdeg, PolyTransform(1, r0), rcut; pcut = 2)
 pB = ACE1.PairPotentials.PolyPairBasis(Pr, [:W, :Fe])
-coeffs = randcoeffs(pB)
+coeffs = _randcoeffs_pair(pB)
 V = combine(pB, coeffs)
 
 
@@ -112,4 +112,3 @@ println(@test all(JuLIP.Testing.test_fio(Vrep)))
 
 #---
 
-end

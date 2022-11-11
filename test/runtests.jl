@@ -32,16 +32,17 @@ using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
 
     # ----------------------
     #   pair potentials
-    include("pair/test_pair_basis.jl")
-    include("pair/test_pair_pot.jl")
-    include("pair/test_repulsion.jl")
+    @testset "PolyPairBasis" begin include("pair/test_pair_basis.jl") end 
+    @testset "PolyPairPot" begin include("pair/test_pair_pot.jl") end 
+    @testset "RepulsiveCore" begin include("pair/test_repulsion.jl") end 
 
     # ----------------------
     #   miscallaneous ...
     # TODO: These tests are current failing - should be re-examined and fixed 
     # include("compat/test_compat.jl")
 
-    @testset "Committee" begin include("test_committee.jl") end 
-    include("test_any.jl")
-    include("polynomials/test_multitrans.jl")
+    @testset "ACE-Committee" begin include("test_committee.jl") end 
+    @testset "Pair-Committee" begin include("test_committee_pair.jl") end 
+    @testset "Any"  begin include("test_any.jl") end 
+    @testset "Multi-Transform" begin include("polynomials/test_multitrans.jl") end 
 end

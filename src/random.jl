@@ -34,7 +34,7 @@ end
 
 # TODO: this could be rand(PSH1BasisFcn) ...
 #       rand_sphere = rand(SphericalHarmonics)
-rand_vec(J::ScalarBasis) where T = rand_radial(J) *  rand_sphere()
+rand_vec(J::ScalarBasis) = rand_radial(J) *  rand_sphere()
 rand_vec(J::ScalarBasis, N::Integer) = [ rand_vec(J) for _ = 1:N ]
 
 # -> rand_config?

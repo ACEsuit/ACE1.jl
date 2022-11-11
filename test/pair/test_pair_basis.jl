@@ -6,7 +6,7 @@
 # --------------------------------------------------------------------------
 
 
-@testset "PolyPairBasis" begin
+
 
 @info("-------- Test PolyPairBasis Implementation ---------")
 
@@ -17,8 +17,8 @@ using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d
 using JuLIP.Potentials: i2z, numz
 
-randr() = 1.0 + rand()
-randcoeffs(B) = rand(length(B)) .* (1:length(B)).^(-2)
+# randr() = 1.0 + rand()
+# randcoeffs(B) = rand(length(B)) .* (1:length(B)).^(-2)
 
 ##
 
@@ -73,4 +73,3 @@ end
 println()
 ##
 
-end
