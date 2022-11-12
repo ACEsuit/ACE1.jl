@@ -56,6 +56,7 @@ println(@test all(JuLIP.Testing.test_fio(pB)))
 
 @info("Finite-difference test on PolyPairBasis forces")
 for ntest = 1:30
+   local E, h, V, coeffs 
    E = energy(pB, at)
    DE = - forces(pB, at)
    U = [ (rand(JVecF) .- 0.5) for _=1:length(at) ]
