@@ -28,6 +28,12 @@ function descriptors(basis, at)
    return X
 end
 
+"""
+Jacobian of `descriptors` w.r.t. atomic positions. This returns a 
+ `nfeatures` x `natoms` x `natoms` tensor `dX` where 
+ `dX[i,j,k]` contains a 3-vector which is the derivative of 
+ `X[i,j]` w.r.t. the position `at.X[k]`.
+"""
 function descriptors_d(basis, at)
    len = maximum( length.(basis.Bz0inds) )
    dX = zeros(JVecF, len, length(at), length(at))

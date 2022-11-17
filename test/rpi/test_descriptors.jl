@@ -12,6 +12,9 @@ using JuLIP: evaluate, evaluate_d, evaluate_ed
 
 ##
 
+# create a standard ACE basis 
+# e.g. here with max degree 8 and 3-correlations (4-body)
+
 @info("Basic test of RPIBasis construction and evaluation")
 maxdeg = 8
 N = 3
@@ -26,20 +29,25 @@ basis = RPIBasis(P1, N, D, maxdeg)
 
 ##
 
+# generate a random atomic structure 
+#  (works with PBC or without...)
 at = bulk(:Al, cubic=true) * 3 
-set_pbc!(at, false)
 at.Z[2:3:end] .= AtomicNumber(:Ti)
 at.Z[5:5:end] .= AtomicNumber(:Si)
 rattle!(at, 0.1)
 
-# nfeature x natoms matrix
+# evaluate nfeature x natoms matrix: each column X[:, i] contains the features 
+# associated with the site i 
 X = ACE1.Descriptors.descriptors(basis, at)
 # nfeature x natoms x natoms tensor with 
 #   dX[i, j, :] the gradient of X[i, j] w.r.t. positions.
+# note each dX[i,j,k] is a 3-vector: the derivative of X[i,j] w.r.t. the 
+# position at.X[k].
 dX = ACE1.Descriptors.descriptors_d(basis, at)
 
 ##
 
+# finite-difference test 
 using Printf 
 U = randn(JVecF, length(at))
 
@@ -65,3 +73,4 @@ for h in (0.1).^(2:10)
    dXh = (F(h) - F(0.0)) / h
    @printf(" %.0e |  %.2e \n", h, norm(dXh - dX0, Inf))
 end
+
