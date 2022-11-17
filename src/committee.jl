@@ -566,3 +566,24 @@ function co_virial(V::OneBody, at::AbstractAtoms; kwargs...)
    vir = virial(V, at)
    return vir, FlexConstTensor(vir)
 end
+
+
+# ------------------------------------------------------------
+#    Committee for superbasis 
+
+import JuLIP.MLIPs: IPSuperBasis
+
+function committee_potential(basis::IPSuperBasis, 
+                             c::AbstractVector, 
+                             co_c::AbstractMatrix)
+   idx = 0
+   co_pots = []
+   for b in basis.BB
+      len = length(b)
+      Ib = idx .+ (1:len)
+      co_pot = committee_potential(b, c[Ib], co_c[Ib,:])
+      push!(co_pots, co_pot)
+      idx += len
+   end
+   return JuLIP.MLIPs.SumIP(co_pots)
+end

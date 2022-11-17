@@ -170,3 +170,40 @@ vir1, co_vir1 = ACE1.co_virial(co_V_comb, at)
 vir2, co_vir2 = ACE1.co_virial(co_V_comb1, at)
 println_slim(@test vir2 ≈ vir1)
 println_slim(@test co_vir1 ≈ co_vir2)
+
+
+## 
+
+@info("quick test of committee for IPSuperBasis")
+
+NCO = 12 
+trans = PolyTransform(1, r0)
+Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
+B_pair = ACE1.PairPotentials.PolyPairBasis(Pr, :W)
+co_c_pair = hcat([randcoeffs(B_pair) for i = 1:NCO]...)
+c_pair = vec(sum(co_c_pair, dims=2) / NCO)
+co_V_pair = ACE1.committee_potential(B_pair, c_pair, co_c_pair)
+
+maxdeg = 10
+r0 = rnn(:W)
+rcut = 2.5 * r0 
+basis = ACE1.Utils.rpi_basis(; species=:W, N=3, r0=r0, maxdeg=maxdeg, rcut=rcut)
+len = length(basis) 
+co_c = Diagonal(1 ./ (1:len).^2) * randn(len, NCO)
+c = mean(co_c, dims=(2,))[:]
+co_V = ACE1.committee_potential(basis, c, co_c)
+
+V_comb = JuLIP.MLIPs.SumIP(co_V_pair, co_V)
+
+B_super = JuLIP.MLIPs.IPSuperBasis(B_pair, basis)
+c_super = [c_pair; c]
+c_co_super = [co_c_pair; co_c]
+co_V_super = ACE1.committee_potential(B_super, c_super, c_co_super)
+
+for ntest = 1:30 
+   at = rattle!(bulk(:W, cubic=true) * 2, 0.2)
+   E1, co_E1 = ACE1.co_energy(co_V_super, at)
+   E2, co_E2 = ACE1.co_energy(V_comb, at)
+   print_tf(@test( E1 ≈ E2 && co_E1 ≈ co_E2 ))
+end
+
