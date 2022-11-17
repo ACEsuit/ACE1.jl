@@ -5,11 +5,6 @@
 # Licensed under ASL - see ASL.md for terms and conditions.
 # --------------------------------------------------------------------------
 
-
-
-
-##
-
 using ACE1
 using Random, Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d, evaluate_ed
@@ -27,29 +22,40 @@ trans = PolyTransform(1, r0)
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
 D = SparsePSHDegree()
 P1 = BasicPSH1pBasis(Pr; species = species, D = D)
-rpibasis = RPIBasis(P1, N, D, maxdeg)
+basis = RPIBasis(P1, N, D, maxdeg)
 
 ##
 
 at = bulk(:Al, cubic=true) * 3 
+set_pbc!(at, false)
 at.Z[2:3:end] .= AtomicNumber(:Ti)
 at.Z[5:5:end] .= AtomicNumber(:Si)
 rattle!(at, 0.1)
 
-X = ACE1.Descriptors.descriptors(rpibasis, at)
-dX = ACE1.Descriptors.descriptors_d(rpibasis, at)
+# nfeature x natoms matrix
+X = ACE1.Descriptors.descriptors(basis, at)
+# nfeature x natoms x natoms tensor with 
+#   dX[i, j, :] the gradient of X[i, j] w.r.t. positions.
+dX = ACE1.Descriptors.descriptors_d(basis, at)
 
 ##
 
 using Printf 
 U = randn(JVecF, length(at))
-_at(t) = ( at1 = deepcopy(at); at1.X[:] = at.X[:] + t*U; at1 )
 
-F(t) = ACE1.Descriptors.descriptors(rpibasis, _at(t))
-dF(t) = (
-   dX = ACE1.Descriptors.descriptors_d(rpibasis, _at(t));
+function _at(t) 
+   at1 = deepcopy(at)
+   X1 = at1.X + t * U 
+   set_positions!(at1, X1)
+   return at1
+end
+
+F(t) = ACE1.Descriptors.descriptors(basis, _at(t))
+
+function dF(t)
+   dX = ACE1.Descriptors.descriptors_d(basis, _at(t))
    return [ dot(dX[i, j, :], U) for i = 1:size(dX, 1), j = 1:size(dX, 2) ]
-)
+end
 
 ##
 

@@ -50,6 +50,8 @@ include("pairpots/pair.jl");
 @reexport using ACE1.PairPotentials
 
 include("committee.jl")
+include("descriptors.jl")
+
 
 # lots of stuff related to random samples:
 #  - random configurations
@@ -63,11 +65,9 @@ include("utils.jl")
 @reexport using ACE1.Utils
 
 
-
 include("compat/compat.jl")
 
 include("fio.jl")
-
 
 
 

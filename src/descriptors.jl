@@ -19,8 +19,10 @@ function descriptors(basis, at)
    for i in 1:length(at)
       Js, Rs, Zs = neigsz(nlist, at, i)
       z0 = at.Z[i]
+      Iz0 = basis.Bz0inds[z2i(basis, z0)]
+      # ----
       b = evaluate(basis, Rs, Zs, z0)
-      bi = b[basis.Bz0inds[z2i(basis, z0)]]
+      bi = b[Iz0]
       X[1:length(bi), i] = bi
    end
    return X
@@ -33,12 +35,15 @@ function descriptors_d(basis, at)
    for i in 1:length(at)
       Js, Rs, Zs = neigsz(nlist, at, i)
       z0 = at.Z[i]
+      Iz0 = basis.Bz0inds[z2i(basis, z0)]
+      leni = length(Iz0)
+      # ----
       db = evaluate_d(basis, Rs, Zs, z0)
-      dbi = db[basis.Bz0inds[z2i(basis, z0)], :]
-      leni = size(dbi, 1)
-      for (ij, j) in enumerate(Js)
-         dX[1:leni, i, j] = dbi[:, ij]
-         dX[1:leni, i, i] -= dbi[:, ij]
+      dbi = db[Iz0, :]
+      for a = 1:length(Js) 
+         j = Js[a]
+         dX[1:leni, i, j] += dbi[:, a]
+         dX[1:leni, i, i] -= dbi[:, a]
       end
    end
    return dX
