@@ -18,7 +18,7 @@ using JuLIP.Potentials: i2z, numz
 using JuLIP.MLIPs: combine
 
 # randr() = 1.0 + rand()
-_randcoeffs_pair(B) = rand(length(B)) .* (1:length(B)).^(-2)
+_randcoeffs_pair(B) = randn(length(B)) .* (1:length(B)).^(-2)
 
 ##
 
@@ -52,9 +52,12 @@ println(@test energy(V, at) ≈ sum(V.coeffs .*  energy(pB, at)))
 @info("   test (de-)dictionisation")
 println(@test all(JuLIP.Testing.test_fio(V)))
 
+##
+
 @info("      check that PolyPairBasis ≈ PolyPairPot")
-for ntest = 1:10
+for ntest = 1:30
    rattle!(at, 0.01)
+   
    coeffs = _randcoeffs_pair(pB)
    V = combine(pB, coeffs)
 
