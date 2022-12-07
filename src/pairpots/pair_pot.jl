@@ -108,27 +108,3 @@ end
 evaluate(V::PolyPairPot, r::Number, args...) = evaluate!(alloc_temp(V, 1), V, r, args...)
 evaluate_d(V::PolyPairPot, r::Number, args...) = evaluate_d!(alloc_temp_d(V, 1), V, r, args...)
 
-
-# --------- Overloading the forces implementation 
-
-function forces(V::PolyPairPot, at::Atoms{T}) where {T}
-   F = zeros(JVec{T}, length(at))
-   nlist = JuLIP.neighbourlist(at, cutoff(V))
-   maxN = JuLIP.maxneigs(nlist)
-   tmp = alloc_temp_d(V, maxN)
-   for (i, j, R) in pairs(nlist)
-      r = norm(R)
-      Zi, Zj = at.Z[i], at.Z[j]
-      Ii = z2i(V, Zi); Ij = z2i(V, Zj)
-      dJ = tmp.dJ[Ii, Ij]
-      evaluate_d!(tmp.J[Ii, Ij], dJ, tmp.tmpd_J[Ii, Ij], 
-                  V.basis.J[Ii, Ij], r, Zi, Zj)
-      idx0 = _Bidx0(V.basis, Zi, Zj)
-      for n = 1:length(V.basis.J[Ii, Ij])
-         cn = V.coeffs[idx0+n]
-         F[i] += 0.5 * cn * dJ[n] * (R/r)
-         F[j] -= 0.5 * cn * dJ[n] * (R/r)
-      end
-   end
-   return F
-end

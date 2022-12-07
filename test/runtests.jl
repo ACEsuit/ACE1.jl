@@ -9,6 +9,9 @@
 using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
       JuLIP, JuLIP.Testing
 
+# turn off multi-threading in JuLIP 
+JuLIP.usethreads!(false)
+
 ##
 @testset "ACE1.jl" begin
     # ------------------------------------------
