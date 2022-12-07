@@ -65,7 +65,7 @@ degrees = [ 12, 10, 8, 8, 8, 8 ]
 @info("Check a few basis properties ")
 # for species in (:X, :Si) # , [:C, :O, :H])
 for species in (:X, :Si, [:C, :O, :H]), N = 1:length(degrees)
-   local Rs, Zs, z0, B, dB, basis, D, P1, Nat
+   local Rs, Zs, z0, B, dB, basis, D, P1, Nat, h, V 
    Nat = 15
    D = SparsePSHDegree()
    P1 = ACE1.BasicPSH1pBasis(Pr; species = species)

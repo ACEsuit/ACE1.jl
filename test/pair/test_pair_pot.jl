@@ -56,6 +56,8 @@ println(@test all(JuLIP.Testing.test_fio(V)))
 
 @info("      check that PolyPairBasis ≈ PolyPairPot")
 for ntest = 1:20
+   local coeffs, V 
+
    rattle!(at, 0.01)
    
    coeffs = _randcoeffs_pair(pB)
