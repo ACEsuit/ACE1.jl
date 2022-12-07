@@ -1,8 +1,9 @@
 name = "ACE1"
 uuid = "e3f9bc04-086e-409a-ba78-e9769fe067bb"
-version = "0.10.2"
+version = "0.11.0-pre"
 
 [deps]
+ACEbase = "14bae519-eb20-449c-a949-9c58ed33163e"
 BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
 Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
@@ -22,10 +23,10 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 Combinatorics = "1"
 ForwardDiff = "0.10"
-JuLIP = "0.11.3"
+JuLIP = "0.13"
 NeighbourLists = "0.5.1 - 0"
 StaticArrays = "1.5"
-julia = "1.6, 1.7"
+julia = "1.6"
 
 [extras]
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
