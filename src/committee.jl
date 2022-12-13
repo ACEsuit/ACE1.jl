@@ -149,10 +149,10 @@ co_evaluate_d!(dV, co_dV, tmpd, V::PIPotential, Rs, Zs, z0) =
 
 
 function co_evaluate_d!(dEs, co_dEs, tmpd, 
-         V::PIPotential, ::StandardEvaluator,
+         V::PIPotential{T, NZ, TPI, TEV, NCO1}, ::StandardEvaluator,
          Rs::AbstractVector{JVec{T}},
          Zs::AbstractVector{<:AtomicNumber},
-         z0::AtomicNumber) where {T}
+         z0::AtomicNumber) where {T, NZ, TPI, TEV, NCO1}
    assert_has_co(V)
    iz0 = z2i(V, z0)
    NCO = ncommittee(V)
@@ -162,14 +162,17 @@ function co_evaluate_d!(dEs, co_dEs, tmpd,
    Araw = tmpd.tmpd_pibasis.A
    c = V.coeffs[iz0]
    co_c = V.committee[iz0]
+   @assert eltype(c) == eltype(co_c[1])
 
    # stage 1: precompute all the A values
    A = evaluate!(Araw, tmpd_1p, basis1p, Rs, Zs, z0)
 
    # stage 2: compute the coefficients for the ∇A_{klm} = ∇ϕ_{klm}
    dAco = tmpd.dAco
+   T_DACO = eltype(dAco)
+   @assert T_DACO == promote_type(eltype(A), eltype(c))
    # WARNING : allocation happens here, should profile whether this matters!
-   co_dAco = zeros(SVector{NCO, eltype(dAco)}, length(dAco))
+   co_dAco = zeros(SVector{NCO, T_DACO}, length(dAco))
    inner = V.pibasis.inner[iz0]
    dAAt = tmpd.dAAt
    fill!(dAco, 0)
@@ -202,16 +205,27 @@ function co_evaluate_d!(dEs, co_dEs, tmpd,
       fill!(co_dEs[ico], zero(JVec{T}))
    end
    
+   _co_dEs = zeros(eltype(co_dEs[1]), NCO, length(Rs))
+
    dAraw = tmpd.tmpd_pibasis.dA
    for (iR, (R, Z)) in enumerate(zip(Rs, Zs))
       evaluate_d!(Araw, dAraw, tmpd_1p, basis1p, R, Z, z0)
       iz = z2i(basis1p, Z)
       zinds = basis1p.Aindices[iz, iz0]
-      for iA = 1:length(basis1p, iz, iz0)
+      @inbounds for iA = 1:length(basis1p, iz, iz0)
          dEs[iR] += real(dAco[zinds[iA]] * dAraw[zinds[iA]])
-         for ico = 1:NCO
-            co_dEs[ico][iR] += real(co_dAco[zinds[iA]][ico] * dAraw[zinds[iA]])
+         _dAraw = dAraw[zinds[iA]]
+         _co_dAco = co_dAco[zinds[iA]]
+         @simd ivdep for ico = 1:NCO
+            # co_dEs[ico][iR] += real(_co_dAco[ico] * _dAraw)
+            _co_dEs[ico, iR] += real(_co_dAco[ico] * _dAraw)
          end
+      end
+   end
+
+   for ico = 1:NCO
+      @inbounds for iR = 1:length(Rs)
+         co_dEs[ico][iR] = _co_dEs[ico, iR]
       end
    end
 
