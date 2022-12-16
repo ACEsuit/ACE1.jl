@@ -261,7 +261,7 @@ function co_energy!(E, co_E, tmp, V::PIPotential, at)
    @assert nt == length(tmp) == length(E) == length(co_E)
    @assert all(length(co_E[i]) == NCO for i in 1:nt)
    nlist = neighbourlist(at, cutoff(V))
-   @threads for i = 1:length(at) 
+   @threads :static for i = 1:length(at) 
       tid = threadid() 
       z0 = at.Z[i] 
       j, Rs, Zs = neigsz!(tmp[tid], nlist, at, i)
@@ -302,7 +302,7 @@ function co_forces!(F, co_F, tmp_d, V::PIPotential, at)
    dV = [ copy(dV0) for _ in 1:nt ]
    co_dV = [ SVector(ntuple(_ -> copy(dV0), NCO)...) for _ in 1:nt ]
 
-   @threads for i = 1:length(at) 
+   @threads :static for i = 1:length(at) 
       tid = threadid() 
       z0 = at.Z[i] 
       j, Rs, Zs = neigsz!(tmp_d[tid], nlist, at, i)
@@ -352,7 +352,7 @@ function co_virial!(vir, co_vir, tmp_d, V::PIPotential, at)
    dV = [ copy(dV0) for _ in 1:nt ]
    co_dV = [ SVector(ntuple(_ -> copy(dV0), NCO)...) for _ in 1:nt ]
 
-   @threads for i = 1:length(at) 
+   @threads :static for i = 1:length(at) 
       tid = threadid() 
       z0 = at.Z[i] 
       j, Rs, Zs = neigsz!(tmp_d[tid], nlist, at, i)
@@ -443,7 +443,7 @@ function co_energy!(E, co_E, tmp, V::PolyPairPot, at)
    @assert nt == length(tmp) == length(E) == length(co_E) 
    @assert all(length(co_E[i]) == NCO for i in 1:nt)
    nlist = neighbourlist(at, cutoff(V))
-   @threads for i = 1:length(at) 
+   @threads :static for i = 1:length(at) 
       tid = threadid() 
       z0 = at.Z[i] 
       Js, Rs, Zs = neigsz!(tmp[tid], nlist, at, i)
@@ -501,7 +501,7 @@ function co_virial!(vir, co_vir, tmp_d, V::PolyPairPot, at)
    dV = [ copy(dV0) for _ in 1:nt ]
    co_dV = [ MVector(ntuple(_ -> copy(dV0), NCO)...) for _ in 1:nt ]
 
-   @threads for i = 1:length(at) 
+   @threads :static for i = 1:length(at) 
       tid = threadid() 
       z0 = at.Z[i] 
       Js, Rs, Zs = neigsz!(tmp_d[tid], nlist, at, i)
