@@ -243,7 +243,7 @@ using Base.Threads: nthreads, threadid, @threads
 using JuLIP: neighbourlist, maxneigs, AbstractCalculator
 using JuLIP.Potentials: neigsz!, site_virial
 
-function co_energy(V::AbstractCalculator, at::AbstractAtoms)
+function co_energy_alloc(V::AbstractCalculator, at::AbstractAtoms)
    assert_has_co(V)
    nt = nthreads()
    NCO = ncommittee(V)
@@ -251,6 +251,11 @@ function co_energy(V::AbstractCalculator, at::AbstractAtoms)
    tmp = [ alloc_temp(V, at) for _ in 1:nt ]
    E = [ zero(T) for _ in 1:nt ]
    co_E = [ zero(SVector{NCO, T}) for _=1:nt ]
+   return E, co_E, tmp
+end
+
+function co_energy(V::AbstractCalculator, at::AbstractAtoms)
+   E, co_E, tmp = co_energy_alloc(V, at)
    return co_energy!(E, co_E, tmp, V, at)
 end
 
@@ -276,7 +281,7 @@ end
 # ------------------------------------------------------------
 #   Total forces
 
-function co_forces(V::AbstractCalculator, at::AbstractAtoms)
+function co_forces_alloc(V::AbstractCalculator, at::AbstractAtoms)
    assert_has_co(V)
    nt = nthreads()
    NCO = ncommittee(V)
@@ -285,6 +290,11 @@ function co_forces(V::AbstractCalculator, at::AbstractAtoms)
    F0 = zeros(JVec{T}, length(at))
    F = [ copy(F0) for _ in 1:nt ]
    co_F = [ SVector(ntuple(_ -> copy(F0), NCO)...) for _ in 1:nt ]
+   return F, co_F, tmp_d 
+end
+
+function co_forces(V::AbstractCalculator, at::AbstractAtoms)
+   F, co_F, tmp_d = co_forces_alloc(V, at)
    return co_forces!(F, co_F, tmp_d, V, at)
 end
 
@@ -326,7 +336,7 @@ end
 # ------------------------------------------------------------
 #   Virial 
 
-function co_virial(V::AbstractCalculator, at::AbstractAtoms)
+function co_virial_alloc(V::AbstractCalculator, at::AbstractAtoms)
    assert_has_co(V)
    nt = nthreads()
    NCO = ncommittee(V)
@@ -335,6 +345,11 @@ function co_virial(V::AbstractCalculator, at::AbstractAtoms)
    v0 = zero(JMat{T})
    vir = [ copy(v0) for _ in 1:nt ]
    co_vir = [ MVector(ntuple(_ -> copy(v0), NCO)...) for _ in 1:nt ] 
+   return vir, co_vir, tmp_d
+end
+
+function co_virial(V::AbstractCalculator, at::AbstractAtoms)
+   vir, co_vir, tmp_d = co_virial_alloc(V, at)
    return co_virial!(vir, co_vir, tmp_d, V, at)
 end
 

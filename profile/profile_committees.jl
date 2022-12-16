@@ -12,6 +12,8 @@ rcut = 2.5 * r0
 basis = ACE1.Utils.rpi_basis(; species=:Cu, N=N, r0=r0, maxdeg=maxdeg, rcut=rcut)
 @show len = length(basis) 
 NCO = 32
+@show NCO 
+
 co_c = Diagonal(1 ./ (1:len).^2) * randn(len, NCO)
 c = mean(co_c, dims=(2,))[:]
 
@@ -24,14 +26,20 @@ using JuLIP
 at = rattle!(bulk(:Cu, cubic=true) * 4, 0.2)
 @show length(at)
 
+nlist = neighbourlist(at, cutoff(V))
+maxneigs = JuLIP.maxneigs(nlist)
+
 ##
 #warmup 
 energy(V, at)
 ACE1.co_energy(co_V, at)
 
-@info("Energy")
-print("Potential: "); @time energy(V, at)
-print("Committee: "); @time ACE1.co_energy(co_V, at)
+@info("Energy - allocating")
+print("Potential : "); @time energy(V, at)
+print("Committee : "); @time ACE1.co_energy(co_V, at)
+
+E, co_E, tmp = ACE1.co_energy_alloc(co_V, at)
+print("Committee!: "); @time ACE1.co_energy!(E, co_E, tmp, co_V, at)
 
 ##
 #warmup 
@@ -39,41 +47,13 @@ forces(V, at)
 ACE1.co_forces(co_V, at)
 
 @info("Forces")
-print("Potential: "); @time forces(V, at)
-print("Committee: "); @time ACE1.co_forces(co_V, at)
+print("Potential : "); @time forces(V, at)
+print("Committee : "); @time ACE1.co_forces(co_V, at)
+
+F, co_F, tmp_d = ACE1.co_forces_alloc(co_V, at)
+print("Committee!: "); @time ACE1.co_forces!(F, co_F, tmp_d, co_V, at)
 
 ## 
-
-# using Base.Threads
-# nt = nthreads()
-# NCO = ACE1.ncommittee(co_V)
-# T = ACE1.fltype(co_V)
-# tmp_d = [ ACE1.alloc_temp_d(co_V, at) for _ in 1:nt ]
-# F0 = zeros(JVec{T}, length(at))
-# F = [ copy(F0) for _ in 1:nt ]
-# co_F = [ SVector(ntuple(_ -> copy(F0), NCO)...) for _ in 1:nt ]
-
-# ACE1.co_forces!(F, co_F, tmp_d, co_V, at)
-
-# print("Committe!: "); @time ACE1.co_forces!(F, co_F, tmp_d, co_V, at)
-
-# ##
-
-# @profview let co_V = co_V, at=at 
-#    for _ = 1:40
-#       ACE1.co_forces(co_V, at)
-#    end
-# end
-
-# ##
-
-# @profview let F = F, co_F = co_F, tmp_d = tmp_d, co_V = co_V, at = at
-#    for _ = 1:30
-#       ACE1.co_forces!(F, co_F, tmp_d, co_V, at)
-#    end
-# end
-
-##
 
 virial(V, at)
 ACE1.co_virial(co_V, at)
@@ -82,11 +62,14 @@ ACE1.co_virial(co_V, at)
 print("Potential: "); @time virial(V, at)
 print("Committee: "); @time ACE1.co_virial(co_V, at)
 
+vir, co_vir, tmp_v = ACE1.co_virial_alloc(co_V, at)
+print("Committee!: "); @time ACE1.co_virial!(vir, co_vir, tmp_v, co_V, at)
 
 ##
 
-# @profview let co_V = co_V, at = at
-#    for _ = 1:10
-#       ACE1.co_virial(co_V, at)
+# @profview let vir = vir, co_vir = co_vir, tmp_v = tmp_v, co_V = co_V, at = at
+#    for _ = 1:20 
+#       ACE1.co_virial!(vir, co_vir, tmp_v, co_V, at)
+#       ACE1.co_energy!(E, co_E, tmp, co_V, at)
 #    end
 # end
