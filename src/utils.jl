@@ -23,7 +23,8 @@ function rpi_basis(; species = :X, N = 3,
       r0 = 2.5,
       trans = PolyTransform(2, r0),
       # degree parameters
-      D = SparsePSHDegree(),
+      wL = 1.5, 
+      D = SparsePSHDegree(; wL = wL),
       maxdeg = 8,
       # radial basis parameters
       rcut = 5.0,
