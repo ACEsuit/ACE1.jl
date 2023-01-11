@@ -30,14 +30,18 @@ function rpi_basis(; species = :X, N = 3,
       rcut = 5.0,
       rin = 0.5 * r0,
       pcut = 2,
-      pin = 0,
+      pin = 2,
       constants = false,
-      rbasis = transformed_jacobi(get_maxn(D, maxdeg, species), trans, rcut, rin;
-                                  pcut=pcut, pin=pin),
-      # one-particle basis
-      Basis1p = BasicPSH1pBasis,
-      basis1p = Basis1p(rbasis; species = species, D = D) )
+      rbasis = nothing, 
+      # one-particle basis type 
+      Basis1p = BasicPSH1pBasis)
 
+   if rbasis == nothing    
+      rbasis = transformed_jacobi(get_maxn(D, maxdeg, species), trans, rcut, rin;
+                                  pcut=pcut, pin=pin)
+   end
+
+   basis1p = Basis1p(rbasis; species = species, D = D)
    return RPIBasis(basis1p, N, D, maxdeg, constants)
 end
 
