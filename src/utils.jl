@@ -34,9 +34,17 @@ function rpi_basis(; species = :X, N = 3,
       constants = false,
       rbasis = nothing, 
       # one-particle basis type 
-      Basis1p = BasicPSH1pBasis)
+      Basis1p = BasicPSH1pBasis, 
+      warn = true)
 
    if rbasis == nothing    
+      if (pcut < 2) && warn 
+         @warn("`pcut` should normally be ≥ 2.")
+      end
+      if (pin < 2) && (pin != 0) && warn 
+         @warn("`pin` should normally be ≥ 2 or 0.")
+      end
+
       rbasis = transformed_jacobi(get_maxn(D, maxdeg, species), trans, rcut, rin;
                                   pcut=pcut, pin=pin)
    end
