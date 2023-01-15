@@ -17,9 +17,9 @@ Most users should use the user-facing companian package [`ACE1pack.jl`](https://
 
 When using this software, please cite the following references
 
-* Drautz, R.: Atomic cluster expansion for accurate and transferable interatomic potentials. Phys. Rev. B Condens. Matter. 99, 014104 (2019). doi:10.1103/PhysRevB.99.014104
+* Drautz, R.: Atomic cluster expansion for accurate and transferable interatomic potentials. Phys. Rev. B Condens. Matter. 99, 014104 (2019). [[html]](doi:10.1103/PhysRevB.99.014104) 
 
-* M. Bachmayr, G. Csanyi, G. Dusson, S. Etter, C. van der Oord, and C. Ortner. Approximation of potential energy surfaces with spherical harmonics. arXiv:1911.03550v2; to appear in Journal of Computational Physics. [http](https://arxiv.org/abs/1911.03550) [PDF](https://arxiv.org/pdf/1911.03550.pdf)
+* M. Bachmayr, G. Csanyi, G. Dusson, R. Drautz, S. Etter, C. van der Oord, and C. Ortner. Atomic cluster expansion: Completeness, efficiency and stability. J. Comp. Phys. 454 (2022). [[html]](https://www.sciencedirect.com/science/article/pii/S0021999122000080?via%3Dihub) [[arxiv]](https://arxiv.org/abs/1911.03550)
 
 
 ## License
