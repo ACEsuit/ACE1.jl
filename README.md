@@ -1,13 +1,16 @@
 # ACE1.jl
 
+<!--
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ACEsuit.github.io/ACE1docs.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://ACEsuit.github.io/ACE1docs.jl/dev)
 
-<!-- [![Build Status](https://travis-ci.com/JuliaMolSim/ACE.jl.svg?branch=master)](https://travis-ci.com/JuliaMolSim/ACE.jl)
+ [![Build Status](https://travis-ci.com/JuliaMolSim/ACE.jl.svg?branch=master)](https://travis-ci.com/JuliaMolSim/ACE.jl)
 
 [![Codecov](https://codecov.io/gh/JuliaMolSim/ACE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaMolSim/ACE.jl) -->
 
-This package implements a flaviour of the *Atomic Cluster Expansion*; i.e., parameterisation schemes for permutation and isometry invariant functions, primarily for the purpose of modelling invariant atomic properties. It provides constructions of symmetric polynomial bases, imposing permutation and isometry invariance. Please see the [Documentation](https://acesuit.github.io/ACE1docs.jl/) for installation, documentation and tutorials.
+This package implements a flavour of the *Atomic Cluster Expansion*; i.e., parameterisation schemes for permutation and isometry invariant functions, primarily for the purpose of modelling invariant atomic properties. It provides constructions of symmetric polynomial bases, imposing permutation and isometry invariance. 
+
+Most users should use the user-facing companian package [`ACE1pack.jl`](https://github.com/ACEsuit/ACE1pack.jl) which also provides documentation and tutorials on the usage of `ACE1.jl`.
 
 
 ## References
