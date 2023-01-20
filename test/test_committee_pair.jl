@@ -85,6 +85,7 @@ for i in 1:NCO
    print_tf(@test( forces(co_V, at) ≈ co_F[i] ))
    print_tf(@test( virial(co_V, at) ≈ co_vir[i] ))
 end
+println() 
 co_V.coeffs[:] .= _c0
 
 ## 
@@ -201,9 +202,10 @@ c_co_super = [co_c_pair; co_c]
 co_V_super = ACE1.committee_potential(B_super, c_super, c_co_super)
 
 for ntest = 1:30 
+   local at, E1, co_E1, E2, co_E2
    at = rattle!(bulk(:W, cubic=true) * 2, 0.2)
    E1, co_E1 = ACE1.co_energy(co_V_super, at)
    E2, co_E2 = ACE1.co_energy(V_comb, at)
    print_tf(@test( E1 ≈ E2 && co_E1 ≈ co_E2 ))
 end
-
+println() 
