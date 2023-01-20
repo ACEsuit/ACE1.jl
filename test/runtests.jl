@@ -17,6 +17,7 @@ using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
     @testset "Real  Ylm" begin include("polynomials/test_rylm.jl") end 
     @testset "Transforms" begin include("polynomials/test_transforms.jl") end 
     @testset "OrthogonalPolynomials" begin include("polynomials/test_orthpolys.jl") end 
+    @testset "Splines" begin include("polynomials/test_splines.jl") end 
 
     # --------------------------------------------
     # core permutation-invariant functionality
