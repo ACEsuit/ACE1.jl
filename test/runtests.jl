@@ -9,6 +9,9 @@
 using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
       JuLIP, JuLIP.Testing
 
+# turn off multi-threading in JuLIP 
+JuLIP.usethreads!(false)
+
 ##
 @testset "ACE1.jl" begin
     # ------------------------------------------
@@ -38,7 +41,7 @@ using ACE1, Test, Printf, LinearAlgebra, StaticArrays, BenchmarkTools,
     @testset "RepulsiveCore" begin include("pair/test_repulsion.jl") end 
 
     # ----------------------
-    #   miscallaneous ...
+    #   miscellaneous ...
     # TODO: These tests are current failing - should be re-examined and fixed 
     # include("compat/test_compat.jl")
 

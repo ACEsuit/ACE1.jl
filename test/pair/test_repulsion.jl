@@ -9,7 +9,7 @@
 
 
 
-#---
+##
 
 using ACE1
 using Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
@@ -21,7 +21,7 @@ using JuLIP.MLIPs: combine
 _randcoeffs_pair(B) = (rand(length(B)) .* (1:length(B)) .- 0.2).^(-2)
 
 
-#---
+##
 @info("--------------- Testing RepulsiveCore Implementation ---------------")
 
 at = bulk(:W, cubic=true) * 3
@@ -38,7 +38,7 @@ pB = ACE1.PairPotentials.PolyPairBasis(Pr, :W)
 coeffs = _randcoeffs_pair(pB)
 V = combine(pB, coeffs)
 
-#--- try out the repulsive potential
+## try out the repulsive potential
 Vfit = V
 
 ri = 2.1
@@ -57,7 +57,7 @@ println(@test JuLIP.Testing.fdtest(Vrep, at))
 @info("check scaling")
 println(@test energy(Vfit, at) ≈ energy(Vrep, at))
 
-#---
+##
 
 
 @info("--------------- Multi-Species RepulsiveCore ---------------")
@@ -73,7 +73,7 @@ coeffs = _randcoeffs_pair(pB)
 V = combine(pB, coeffs)
 
 
-#--- try out the repulsive potential
+## try out the repulsive potential
 Vfit = V
 
 ri = 2.1
@@ -99,7 +99,7 @@ for (z, z0, j, j0) in zip([z1, z1, z2], [z1, z2, z2], [1, 1, 2], [1, 2, 2])
    println(@test all(Vrep.Vin[i,i0](r) == Vrep(r, z, z0) for r in rin))
 end
 
-#---
+##
 
 @info("JuLIP FD test")
 println(@test JuLIP.Testing.fdtest(Vrep, at))
@@ -110,5 +110,5 @@ println(@test energy(Vfit, at) ≈ energy(Vrep, at))
 @info("check FIO")
 println(@test all(JuLIP.Testing.test_fio(Vrep)))
 
-#---
+##
 
