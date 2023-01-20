@@ -303,10 +303,11 @@ function evaluate!(P, tmp, J::TransformedPolys, r, args...; maxn=length(J))
    return P
 end
 
+
 function evaluate_d!(P, dP, tmp, J::TransformedPolys, r, args...; maxn=length(J))
    # transform coordinates
-   t = transform(J.trans, r, args...)
-   dt = transform_d(J.trans, r, args...)
+   t = transform(J.trans, r, args...)::Float64
+   dt = transform_d(J.trans, r, args...)::Float64
    # evaluate the actual Jacobi polynomials + derivatives w.r.t. x
    evaluate_ed!(P, dP, nothing, J.J, t, maxn=maxn)
    e = evaluate(J.envelope, J.trans, r)

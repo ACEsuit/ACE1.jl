@@ -50,8 +50,7 @@ standardevaluator(V::PIPotential) =
 
 maxorder(V::PIPotential) = maxorder(V.pibasis)
 
-ncommittee(V::PIPotential{T, NZ, TPI, TEV, NCO}) where {T, NZ, TPI, TEV, NCO} = 
-   isnothing(V.committee) ? 0 : NCO 
+ncommittee(V::PIPotential{T, NZ, TPI, TEV, NCO}) where {T, NZ, TPI, TEV, NCO} = NCO 
 
 # ------------------------------------------------------------
 #   Initialisation code
