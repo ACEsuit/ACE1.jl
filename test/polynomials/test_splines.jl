@@ -42,7 +42,12 @@ zFe = AtomicNumber(:Fe)
 zC = AtomicNumber(:C)
 zAl = AtomicNumber(:Al)
 
-for ntest = 1:30 
+@info("Test radial basis accuracy")
+npass = 0 
+d_npass = 0 
+for ntest = 1:100
+   local r, z, z0, p, s, dp, ds 
+   global npass, d_npass
    r = 2.5 + 3 * rand() 
    z = rand([zFe, zC, zAl])
    z0 = rand([zFe, zC, zAl])
@@ -52,9 +57,11 @@ for ntest = 1:30
    dp = evaluate_d(Pr, r, z, z0)
    ds = evaluate_d(Sr, r, z, z0)
 
-   print_tf(@test norm(p - s, Inf) < 1e-8)
-   print_tf(@test norm(dp - ds, Inf) < 1e-4)
+   npass += norm(p - s, Inf) < 1e-9
+   d_npass += norm(dp - ds, Inf) < 1e-5
 end
+print("  npass = $npass / 100: "); println_slim(@test npass > 95)
+print("d_npass = $d_npass / 100: "); println_slim(@test d_npass > 95)
 
 ##
 
@@ -84,7 +91,12 @@ B1p_S = BasicPSH1pBasis(Sr; species = [:Fe, :Al, :C], D = D)
 rpibasis_P = RPIBasis(B1p_P, N, D, maxdeg)
 rpibasis_S = RPIBasis(B1p_S, N, D, maxdeg)
 
-for ntest = 1:30 
+npass = 0 
+d_npass = 0
+
+for ntest = 1:100 
+   local Nat, Rs, Zs, z0 
+   global npass, d_npass
    Nat = 12 
    Rs = [ (2 + rand() * 3) * ACE1.Random.rand_sphere() for _ = 1:Nat ]
    Zs = rand([zFe, zC, zAl], Nat)
@@ -93,11 +105,13 @@ for ntest = 1:30
    B_P = evaluate(rpibasis_P, Rs, Zs, z0)
    B_S = evaluate(rpibasis_S, Rs, Zs, z0)
 
-   print_tf(@test norm(B_P - B_S, Inf) / Nat < 1e-5) 
-
    dB_P = evaluate_d(rpibasis_P, Rs, Zs, z0)
    dB_S = evaluate_d(rpibasis_S, Rs, Zs, z0)
 
-   print_tf(@test norm(dB_P - dB_S, Inf) / Nat < 1e-4)
+   npass += (norm(B_P - B_S, Inf) / Nat < 1e-7)
+   d_npass += (norm(dB_P - dB_S, Inf) / Nat < 1e-4)
 end
+
+print("  npass = $npass / 100: "); println_slim(@test npass > 95)
+print("d_npass = $d_npass / 100: "); println_slim(@test d_npass > 95)
 
