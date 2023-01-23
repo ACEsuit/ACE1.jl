@@ -8,16 +8,17 @@ using Interpolations: cubic_spline_interpolation
 
 using JuLIP.Potentials: z2i, i2z, SZList, cutoff
 import ACE1: alloc_B, alloc_dB, alloc_temp, alloc_temp_d, 
-             evaluate!, evaluate_d!, evaluate 
+             evaluate!, evaluate_d!, evaluate, 
+             write_dict, read_dict 
 
 # _rr = range(0.0, stop=5.0, length=10)
 # _ff = sin.(_rr)
 # const SPLINE{T} = Interpolations.Extrapolation{T, 1, ScaledInterpolation{T, 1, Interpolations.BSplineInterpolation{T, 1, OffsetArrays.OffsetVector{T, Vector{T}}, BSpline{Cubic{Line{OnGrid}}}, Tuple{Base.OneTo{Int64}}}, BSpline{Cubic{Line{OnGrid}}}, Tuple{StepRangeLen{T, Base.TwicePrecision{T}, Base.TwicePrecision{T}, Int64}}}, BSpline{Cubic{Line{OnGrid}}}, Throw{Nothing}}
 
 struct RadialSplines{T, NZ, SPLINE} <: ACE1.ScalarBasis{T}
-   rcut::T
    splines::Array{SPLINE, 3}
    zlist::SZList{NZ}
+   ranges::Array{Tuple{T, T, Int}, 3}
 end
 
 
@@ -32,6 +33,7 @@ function RadialSplines(J; nnodes = 1_000, zlist = J.trans.zlist)
    rcut = cutoff(J) 
    dx = rcut/nnodes 
    rcut += 4*dx 
+   rg_params = (0.0, rcut, nnodes)
    rr = range(0.0, stop=rcut, length=nnodes)
    NZ = length(zlist)
    NB = length(J)
@@ -49,7 +51,41 @@ function RadialSplines(J; nnodes = 1_000, zlist = J.trans.zlist)
    end
 
    splines_ = identity.(splines)
-   return RadialSplines(rcut, splines_, zlist)
+   range_params = fill(rg_params, size(splines))
+   return RadialSplines(splines_, zlist, range_params)
+end
+
+# --------------------- FIO 
+
+
+==(P1::RadialSplines, P2::RadialSplines) =  ACE1._allfieldsequal(P1, P2)
+
+function write_dict(basis::RadialSplines{T})  where {T} 
+   sz_spl = size(basis.splines)
+   splines = basis.splines[:]
+   range_params = basis.ranges[:]
+   ranges = [ range(p[1], stop=p[2], length=p[3]) for p in range_params ]
+   spl_vals = [ spl.(rg) for (spl, rg) in zip(splines, ranges) ]
+   return Dict("__id__" => "ACE1_RadialSplines",
+                "T" => write_dict(T), 
+                "zlist" => write_dict(basis.zlist),
+                "size" => sz_spl,
+                "range_params" => range_params, 
+                "nodal_values" => spl_vals,
+               )
+end
+
+function read_dict(::Val{:ACE1_RadialSplines}, D::Dict)
+   T = read_dict(D["T"])
+   zlist = read_dict(D["zlist"])
+   range_params = D["range_params"]
+   ranges = [ range(T(p[1]), stop=T(p[2]), length=Int(p[3])) 
+               for p in range_params ]
+   spl_vals = [ T.(v) for v in D["nodal_values"] ]
+   splines = [ cubic_spline_interpolation(rg, vals) for (rg, vals) in zip(ranges, spl_vals) ]
+   splines_ = collect( reshape(splines, D["size"]...) )
+   range_params = collect(reshape([ tuple(T(p[1]), T(p[2]), Int(p[3])) for p in range_params ], D["size"]...))
+   return RadialSplines(splines_, zlist, range_params)
 end
 
 # --------------------- Evaluation codes 
