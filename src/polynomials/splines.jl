@@ -6,7 +6,8 @@ import Interpolations, ACE1, ForwardDiff
 
 using Interpolations: cubic_spline_interpolation
 
-using JuLIP.Potentials: z2i, i2z, SZList, cutoff
+using JuLIP.Potentials: z2i, i2z, SZList
+import JuLIP.Potentials: cutoff 
 import ACE1: alloc_B, alloc_dB, alloc_temp, alloc_temp_d, 
              evaluate!, evaluate_d!, evaluate, 
              write_dict, read_dict 
@@ -23,6 +24,8 @@ end
 
 
 Base.length(basis::RadialSplines) = size(basis.splines, 1)
+
+cutoff(basis::RadialSplines) = maximum(rg[3] for rg in basis.ranges)
 
 # --------------------- Setup codes
 
@@ -57,21 +60,31 @@ end
 
 # --------------------- FIO 
 
+function export_splines(basis::RadialSplines)
+   _get_rg(rgp) = range(rgp[1], stop=rgp[2], length=rgp[3])
+   _get_vals(spl, rg) = spl.(rg)
+   ranges = _get_rg.(basis.ranges) 
+   nodalvals = _get_vals.(basis.splines, ranges)
+   return ranges, nodalvals, basis.zlist.list 
+end
 
-==(P1::RadialSplines, P2::RadialSplines) =  ACE1._allfieldsequal(P1, P2)
+
+import Base: == 
+==(P1::RadialSplines, P2::RadialSplines) = (
+            (P1.ranges == P2.ranges) && (P1.zlist == P2.zlist) &&
+            all([s1.itp.itp.coefs ≈ s2.itp.itp.coefs for (s1, s2) in zip(P1.splines, P2.splines)])
+      )
+
 
 function write_dict(basis::RadialSplines{T})  where {T} 
+   ranges, nodalvals, _ = export_splines(basis)
    sz_spl = size(basis.splines)
-   splines = basis.splines[:]
-   range_params = basis.ranges[:]
-   ranges = [ range(p[1], stop=p[2], length=p[3]) for p in range_params ]
-   spl_vals = [ spl.(rg) for (spl, rg) in zip(splines, ranges) ]
    return Dict("__id__" => "ACE1_RadialSplines",
                 "T" => write_dict(T), 
                 "zlist" => write_dict(basis.zlist),
                 "size" => sz_spl,
-                "range_params" => range_params, 
-                "nodal_values" => spl_vals,
+                "range_params" => basis.ranges[:], 
+                "nodal_values" => nodalvals[:],
                )
 end
 
@@ -107,7 +120,7 @@ function evaluate!(B, tmp, basis::RadialSplines, r, z, z0)
    fill!(B, 0)
 
    # suppose we are outside the cutoff, then skip this
-   if basis.rcut <= r
+   if cutoff(basis) <= r
       print(".")
       return B 
    end
@@ -132,7 +145,7 @@ function evaluate_d!(B, dB, tmpd, basis::RadialSplines, r, z, z0)
    fill!(dB, 0)
 
    # suppose we are outside the cutoff, then skip this
-   if basis.rcut <= r
+   if cutoff(basis) <= r
       return dB 
    end
 

@@ -38,12 +38,8 @@ Sr = ACE1.Splines.RadialSplines(Pr; nnodes=4_000)
 
 ##
 
-D = write_dict(Sr)
-Sr2 = read_dict(D)
-Sr.zlist == Sr2.zlist
-Sr.ranges == Sr2.ranges
-Sr.splines == Sr2.splines
-JuLIP.Testing.test_fio(Sr)
+@info("test fio")
+println_slim(@test all( JuLIP.Testing.test_fio(Sr) ))
 
 ##
 
