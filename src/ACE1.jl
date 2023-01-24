@@ -29,7 +29,7 @@ include("prototypes.jl")
 include("polynomials/sphericalharmonics.jl")
 include("polynomials/transforms.jl"); @reexport using ACE1.Transforms
 include("polynomials/orthpolys.jl"); @reexport using ACE1.OrthPolys
-
+include("polynomials/splines.jl"); @reexport using ACE1.Splines
 
 # The One-particle basis is the first proper building block
 include("oneparticlebasis.jl")
