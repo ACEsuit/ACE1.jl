@@ -211,7 +211,13 @@ function agnesi_transform(r0, p, q;
    @assert q >= p      
    @assert a > 0 
    fwdt = "r -> 1 / (1 + $a * (r/$r0)^$q / (1 + (r/$r0)^($(q - p))) ) "
-   invt = "auto"
+   if p == q 
+      invt = "x -> $r0 * ( 2/$a * (1/x - 1) )^(1/$p)"
+   elseif q == 2*p 
+      invt = "x -> (y = (1/x-1)/$a; r = $r0 * (y/2 + sqrt(y^2/4 + y))^(1/$p); r)"
+   else 
+      invt = "auto"
+   end
    return AnalyticTransform(fwdt, invt)
 end
 

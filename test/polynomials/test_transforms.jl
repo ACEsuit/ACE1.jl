@@ -101,6 +101,22 @@ println_slim(@test all(test_fio(trans)))
 
 ##
 
+@info("Testing Agnesi(3,3)")
+
+trans = agnesi_transform(r0, 3, 3)
+ACE1.Testing.test_transform(trans, [0.1, 5.0])
+println()
+println_slim(@test all(JuLIP.Testing.test_fio(trans)))
+
+##
+
+@info("Testing Agnesi(2,4)")
+
+trans = agnesi_transform(r0, 2, 4)
+ACE1.Testing.test_transform(trans, [0.1, 5.0])
+println()
+println_slim(@test all(JuLIP.Testing.test_fio(trans)))
+
 
 # ##
 #
