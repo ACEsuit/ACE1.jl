@@ -89,6 +89,34 @@ println_slim(@test all(JuLIP.Testing.test_fio(trans)))
 
 ##
 
+@info("Testing Generalized Agnesi Transform")
+import ACE1.Transforms: transform_d 
+r0 = 2.712
+trans = agnesi_transform(r0, 3, 4)
+rr = range(0.0, 6.0, length=1_000)
+td_rr = transform_d.(Ref(trans), rr)
+td_r0 = transform_d(trans, r0)
+println_slim(@test all(abs(td_r0) .>= abs.(td_rr)))
+println_slim(@test all(test_fio(trans)))
+
+##
+
+@info("Testing Agnesi(3,3)")
+
+trans = agnesi_transform(r0, 3, 3)
+ACE1.Testing.test_transform(trans, [0.1, 5.0])
+println()
+println_slim(@test all(JuLIP.Testing.test_fio(trans)))
+
+##
+
+@info("Testing Agnesi(2,4)")
+
+trans = agnesi_transform(r0, 2, 4)
+ACE1.Testing.test_transform(trans, [0.1, 5.0])
+println()
+println_slim(@test all(JuLIP.Testing.test_fio(trans)))
+
 
 # ##
 #
