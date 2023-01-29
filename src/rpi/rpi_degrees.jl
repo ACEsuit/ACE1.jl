@@ -133,6 +133,7 @@ wn_fun(N, zi, z0) = Dn[(N, zi, z0)] / Dd[(N, z0)]
 wl_fun(N, zi, z0) = Dl[(N, zi, z0)] / Dd[(N, z0)]
 ```
 If the key `(N, zi, z0)` does not exist then it will instead look for
+- a key `N`, then
 - a key `(zi, z0)`
 - or a key `"default"`
 If none exist, an error is thrown. Similarly if the key `(N, z0)` does not
@@ -177,12 +178,14 @@ end
 function _findweight(D::Dict, N, zi, z0)
    if haskey(D, (N, zi, z0))
       return D[(N, zi, z0)]
+   elseif haskey(D, N)
+      return D[N]
    elseif haskey(D, (zi, z0))
       return D[(zi, z0)]
    elseif haskey(D, "default")
       return D["default"]
    end
-   error("SparsePSHDegreeM: no valid key found for argument $(args)")
+   error("SparsePSHDegreeM: no valid key found for argument N = $N, zi=$zi, z0=$z0")
 end
 
 SparsePSHDegreeM(DN::Dict, DL::Dict, DD::Dict) = SparsePSHDegreeM(

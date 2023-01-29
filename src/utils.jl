@@ -8,7 +8,8 @@
 
 module Utils
 
-import ACE1.RPI: BasicPSH1pBasis, SparsePSHDegree, RPIBasis, get_maxn
+import ACE1.RPI: BasicPSH1pBasis, SparsePSHDegree, RPIBasis, get_maxn, 
+                 SparsePSHDegreeM
 import ACE1: PolyTransform, transformed_jacobi
 import ACE1.PairPotentials: PolyPairBasis
 
@@ -38,9 +39,11 @@ function _auto_degrees(N::Integer, maxdeg::AbstractVector, wL::Union{Number, Abs
       Dn = Dict("default" => 1.0) 
       Dl = Dict([n => wL[n] for n in 1:N]...)
       Dd = Dict([n => maxdeg[n] for n in 1:N]...)
-      ACE1.RPI.SparsePSHDegreeM(Dn, Dl, Dd)
-   end 
-   return D, 1
+      D = SparsePSHDegreeM(Dn, Dl, Dd)
+      maxdeg = 1
+   end
+
+   return D, maxdeg
 end
 
 
@@ -63,7 +66,7 @@ function rpi_basis(; species = :X, N = 3,
       Basis1p = BasicPSH1pBasis, 
       warn = true)
 
-   D, maxdeg = _auto_degrees(N, maxdeg, wL, D)      
+   D, maxdeg = _auto_degrees(N, maxdeg, wL, D)     
 
    if rbasis == nothing    
       if (pcut < 2) && warn 

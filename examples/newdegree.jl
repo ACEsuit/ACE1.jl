@@ -11,7 +11,7 @@
 
 using ACE1, JuLIP
 using ACE1: z2i, i2z, order
-#---
+##
 
 zTi = AtomicNumber(:Ti)
 zAl = AtomicNumber(:Al)
@@ -38,7 +38,7 @@ Dd = Dict( "default" => 10,
 
 Deg = ACE1.RPI.SparsePSHDegreeM(Dn, Dl, Dd)
 
-#---
+##
 
 # generate basis
 # - note that degree is already incorporated into Deg
@@ -49,7 +49,7 @@ basis = ACE1.Utils.rpi_basis(species = [:Ti, :Al],
                               D = Deg,
                               maxdeg = 1)
 
-#---
+##
 # analyse the basis a bit to see the effect this had
 
 iAl = z2i(basis, AtomicNumber(:Al))
@@ -74,7 +74,7 @@ println("The Ti-Ti interaction has more basis functions than Ti-Al interaction")
 @show length(specTi2_Ti)
 @show length(specTi2_Al)
 
-#---
+##
 #
 # specAl = collect(keys(basis.pibasis.inner[iAl].b2iAA))
 # specTi = collect(keys(basis.pibasis.inner[iTi].b2iAA))
@@ -85,3 +85,51 @@ println("The Ti-Ti interaction has more basis functions than Ti-Al interaction")
 #
 # spec2 = spec[I_ord2]
 # ns_spec2 = [ b.oneps[1].n for b in spec2 ]
+
+##
+
+@info("Check the simplified interface")
+@info("Test 1")
+Dn = Dict( "default" => 1.0, )
+Dl = Dict( "default" => 1.5, ) 
+Dd = Dict( 1 => 20, 2 => 20, 3 => 15, 4 => 10)
+Deg = ACE1.RPI.SparsePSHDegreeM(Dn, Dl, Dd)
+basis1 = ACE1.Utils.rpi_basis(species = :X,
+                              N = 4,
+                              r0 = 1.0,
+                              D = Deg,
+                              maxdeg = 1)
+
+basis2 = ACE1.Utils.rpi_basis(species = :X,
+                              N = 4,
+                              r0 = 1.0,
+                              wL = 1.5, 
+                              maxdeg = [20, 20, 15, 10])
+
+@assert basis1 == basis2 
+
+##
+
+@info("Test 2")
+
+N = 4
+Dn = Dict( "default" => 1.0, )
+Dl = Dict( 1 => 1.0, 2 => 1.5, 3 => 1.75, 4 => 2.0, ) 
+Dd = Dict( 1 => 24, 2 => 22, 3 => 16, 4 => 11)
+Deg = ACE1.RPI.SparsePSHDegreeM(Dn, Dl, Dd)
+basis1 = ACE1.Utils.rpi_basis(species = [:Ti, :Al],
+                              N = N,
+                              r0 = 1.0,
+                              D = Deg,
+                              maxdeg = 1)
+
+basis2 = ACE1.Utils.rpi_basis(species = [:Ti, :Al],
+                              N = N,
+                              r0 = 1.0,
+                              wL = [Dl[n] for n = 1:N], 
+                              maxdeg = [Dd[n] for n = 1:N])
+
+@assert basis1 == basis2 
+
+##
+
