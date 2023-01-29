@@ -203,6 +203,10 @@ The transform satisfies
 ```
 
 As default parameters we recommend `p = 2, q = 4` and the defaults for `a`.
+
+Note that the inverse transform is only implemented for the special cases 
+$p = q$ and $q = 2p$. The inverse is not needed for fitting or simulation, but 
+only for some tests.
 """
 function agnesi_transform(r0, p, q;    
                a = (-2 * q + p * (-2 + 4 * q)) / (p + p^2 + q + q^2) )
