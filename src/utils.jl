@@ -8,7 +8,8 @@
 
 module Utils
 
-import ACE1.RPI: BasicPSH1pBasis, SparsePSHDegree, RPIBasis, get_maxn
+import ACE1.RPI: BasicPSH1pBasis, SparsePSHDegree, RPIBasis, get_maxn, 
+                 SparsePSHDegreeM
 import ACE1: PolyTransform, transformed_jacobi
 import ACE1.PairPotentials: PolyPairBasis
 
@@ -18,14 +19,42 @@ import ACE1.PairPotentials: PolyPairBasis
 
 export rpi_basis, descriptor, pair_basis, ace_basis
 
+
+"""
+`_auto_degrees` : provide a simplified interface to generate degree parameters 
+for the ACE1 basis. 
+"""
+function _auto_degrees(N::Integer, maxdeg::Number, wL::Number, D = nothing)
+   if D == nothing
+      D = SparsePSHDegree(; wL = wL)
+   end
+   return D, maxdeg 
+end
+
+function _auto_degrees(N::Integer, maxdeg::AbstractVector, wL::Union{Number, AbstractVector}, D = nothing)
+   if D == nothing 
+      if wL isa Number
+         wL = wL .* ones(N)
+      end
+      Dn = Dict("default" => 1.0) 
+      Dl = Dict([n => wL[n] for n in 1:N]...)
+      Dd = Dict([n => maxdeg[n] for n in 1:N]...)
+      D = SparsePSHDegreeM(Dn, Dl, Dd)
+      maxdeg = 1
+   end
+
+   return D, maxdeg
+end
+
+
 function rpi_basis(; species = :X, N = 3,
       # transform parameters
       r0 = 2.5,
       trans = PolyTransform(2, r0),
       # degree parameters
       wL = 1.5, 
-      D = SparsePSHDegree(; wL = wL),
       maxdeg = 8,
+      D = nothing,
       # radial basis parameters
       rcut = 5.0,
       rin = 0.5 * r0,
@@ -36,6 +65,8 @@ function rpi_basis(; species = :X, N = 3,
       # one-particle basis type 
       Basis1p = BasicPSH1pBasis, 
       warn = true)
+
+   D, maxdeg = _auto_degrees(N, maxdeg, wL, D)     
 
    if rbasis == nothing    
       if (pcut < 2) && warn 
