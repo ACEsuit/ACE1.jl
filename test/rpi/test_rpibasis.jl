@@ -12,9 +12,9 @@ using ACE1
 using Random, Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using JuLIP: evaluate, evaluate_d, evaluate_ed
 using JuLIP.MLIPs: combine
+using ACE1.Testing: println_slim
 
-
-#---
+##
 
 @info("Basic test of RPIBasis construction and evaluation")
 maxdeg = 15
@@ -26,12 +26,12 @@ Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
 D = SparsePSHDegree()
 P1 = BasicPSH1pBasis(Pr; species = :X, D = D)
 
-#---
+##
 
 pibasis = PIBasis(P1, N, D, maxdeg)
 rpibasis = RPIBasis(P1, N, D, maxdeg)
 
-#---
+##
 @info("Basis construction and evaluation checks")
 @info("check single species")
 Nat = 15
@@ -43,7 +43,7 @@ println(@test(size(dB) == (length(rpibasis), length(Rs))))
 B_, dB_ = evaluate_ed(rpibasis, Rs, Zs, z0)
 println(@test (B_ ≈ B) && (dB_ ≈ dB))
 
-#---
+##
 @info("check multi-species")
 maxdeg = 5
 Pr = transformed_jacobi(maxdeg, trans, rcut; pcut = 2)
@@ -58,7 +58,7 @@ println(@test(size(dB) == (length(basis), length(Rs))))
 B_, dB_ = evaluate_ed(basis, Rs, Zs, z0)
 println(@test (B_ ≈ B) && (dB_ ≈ dB))
 
-#---
+##
 
 degrees = [ 12, 10, 8, 8, 8, 8 ]
 
@@ -123,4 +123,12 @@ for species in (:X, :Si, [:C, :O, :H]), N = 1:length(degrees)
 end
 
 
-#---
+##
+
+@info("Brief checking that evaluators work ok")
+using StaticArrays: SVector
+basis = ACE1.Utils.ace_basis(; species = :Si, N = 3, maxdeg = 8, rcut = 5.5)
+at = bulk(:Si, cubic=true) * 2
+println_slim(@test energy(basis, at) isa Vector{Float64})
+println_slim(@test forces(basis, at) isa Vector{Vector{SVector{3, Float64}}})
+println_slim(@test virial(basis, at) isa Vector{<: AbstractMatrix})

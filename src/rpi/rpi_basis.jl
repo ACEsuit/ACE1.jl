@@ -308,6 +308,7 @@ alloc_temp_d(basis::RPIBasis, Rs::AbstractVector, args...) =
 
 alloc_temp_d(basis::RPIBasis, nmax::Integer) =
     (
+    B = zeros(fltype(basis), length(basis)), 
     AA = site_alloc_B(basis.pibasis),
     AAr = real(site_alloc_B(basis.pibasis)),
     tmp_pibasis = alloc_temp(basis.pibasis, nmax),
@@ -339,3 +340,6 @@ function evaluate_d!(B, dB, tmpd, basis::RPIBasis, Rs, Zs, z0)
    end
    return dB
 end
+
+evaluate_d!(dB, tmpd, basis::RPIBasis, Rs, Zs, z0) = 
+         evaluate_d!(tmpd.B, dB, tmpd, basis, Rs, Zs, z0)
