@@ -16,7 +16,8 @@ import ACE1: _allfieldsequal
 
 abstract type DistanceTransform end
 
-export PolyTransform, IdTransform, MorseTransform, AgnesiTransform
+export PolyTransform, IdTransform, MorseTransform, AgnesiTransform, 
+         agnesi_transform 
 
 # fall-backs from species dependent to independent transforms 
 transform(t::DistanceTransform, r::Number, z::AtomicNumber, z0::AtomicNumber) = transform(t, r)
@@ -181,6 +182,53 @@ end
 (t::AgnesiTransform)(r) = transform(t, r)
 
 
+# --------- generalized agnesi transform 
+
+@doc raw"""
+`function agnesi_transform:` constructs a generalized agnesi transform. 
+```
+trans = agnesi_transform(r0, p, q)
+```
+with `q >= p`. This generates an `AnalyticTransform` object that implements 
+```math
+   x(r) = \frac{1}{1 + a (r/r_0)^q / (1 + (r/r0)^(q-p))}
+```
+with default `a` chosen such that $|x'(r)|$ is maximised at $r = r_0$. But `a` may also be specified directly as a keyword argument. 
+
+The transform satisfies 
+```math 
+   x(r) \sim \frac{1}{1 + a (r/r_0)^p} \quad \text{as} \quad r \to 0 
+   \quad \text{and} 
+   \quad 
+   x(r) \sim \frac{1}{1 + a (r/r_0)^p}  \quad \text{as} r \to \infty.
+```
+
+As default parameters we recommend `p = 2, q = 4` and the defaults for `a`.
+
+Note that the inverse transform is only implemented for the special cases 
+$p = q$ and $q = 2p$. The inverse is not needed for fitting or simulation, but 
+only for some tests.
+"""
+function agnesi_transform(r0, p, q;    
+               a = (-2 * q + p * (-2 + 4 * q)) / (p + p^2 + q + q^2) )
+   @assert p isa Integer
+   @assert q isa Integer
+   @assert q >= p      
+   @assert a > 0 
+   fwdt = "r -> 1 / (1 + $a * (r/$r0)^$q / (1 + (r/$r0)^($(q - p))) ) "
+   if p == q 
+      invt = "x -> $r0 * ( 2/$a * (1/x - 1) )^(1/$p)"
+   elseif q == 2*p 
+      invt = "x -> (y = (1/x-1)/$a; r = $r0 * (y/2 + sqrt(y^2/4 + y))^(1/$p); r)"
+   else 
+      invt = "auto"
+   end
+   return AnalyticTransform(fwdt, invt)
+end
+
+
+
+
 # --------- AnalyticTransform 
 
 import JuLIP
@@ -192,7 +240,7 @@ by an analytic expression.
 
 Constructor: 
 ```julia 
-AnalyticTransform(forwardmap, inversmap)
+AnalyticTransform(forwardmap, inversemap)
 ```
 For `forwardmap` and `inversemap` must both be of type `AnalyticFunction`.
 (cf. `JuLIP.@analytic`).
@@ -200,9 +248,8 @@ For `forwardmap` and `inversemap` must both be of type `AnalyticFunction`.
 Example: 
 ```julia
 using ACE1: AnalyticTransform
-using JuLIP: @analytic
-trans = AnalyticTransform( :(r -> exp( - 2 * r )), 
-                           :(x -> -0.5 * log(x)) )
+trans = AnalyticTransform( "r -> exp( - 2 * r )", 
+                           "x -> -0.5 * log(x)" )
 ```
 """
 struct AnalyticTransform{T} <: DistanceTransform
@@ -221,7 +268,12 @@ Base.show(io::IO, trans::AnalyticTransform) =
 function AnalyticTransform(str_f::String, str_finv::String; T=Float64)
    ex_f = Meta.parse(str_f)
    ex_df = JuLIP.Potentials.fdiff( ex_f, 1 )
-   ex_finv = Meta.parse(str_finv)
+   if str_finv == "auto"
+      @warn("automatic inverse not implemented, inverse will return NaN")
+      ex_finv = :(r -> NaN)
+   else
+      ex_finv = Meta.parse(str_finv)
+   end
    f = ScalarFun{T}(Meta.eval(ex_f))
    df = ScalarFun{T}(Meta.eval(ex_df))
    finv = ScalarFun{T}(Meta.eval(ex_finv))
