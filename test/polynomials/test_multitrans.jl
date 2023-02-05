@@ -1,7 +1,7 @@
 using ACE1, Printf, Test, LinearAlgebra, JuLIP, JuLIP.Testing
 using ACE1.Testing 
 using JuLIP: evaluate, evaluate_d
-using ACE1.Transforms: multitransform, transform, transform_d
+using ACE1.Transforms: multitransform, transform, transform_d, inv_transform
 
 ##
 
@@ -34,6 +34,18 @@ for f in [transform, transform_d], z in (zFe, zC, zAl), z0 in (zFe, zC, zAl)
       print_tf(@test (f(trans, r, z, z0) 
                         == f(PolyTransform(2, (rnn(z)+rnn(z0)) / 2), r)))
    end
+end
+println() 
+
+##
+
+@info("Checking inversion")
+z = zFe; z0 = zC 
+for z in (zFe, zC, zAl), z0 in (zFe, zC, zAl), ntest = 1:5 
+   r = (rnn(z)+rnn(z0))/2 + 2 * rand() - 0.5
+   x = transform(trans, r, z, z0)
+   r2 = inv_transform(trans, x, z, z0)
+   print_tf(@test r ≈ r2) 
 end
 println() 
 
