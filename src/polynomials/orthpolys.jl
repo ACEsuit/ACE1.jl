@@ -280,9 +280,9 @@ read_dict(::Val{:ACE1_TransformedPolys}, D::Dict) = TransformedPolys(D)
 Base.length(J::TransformedPolys) = length(J.J)
 fltype(P::TransformedPolys{T}) where {T} = T
 
-function ACE1.rand_radial(J::TransformedPolys)
+function ACE1.rand_radial(J::TransformedPolys, z, z0)
    t = ACE1.rand_radial(J.J)
-   return inv_transform(J.trans, t)
+   return inv_transform(J.trans, t, z, z0)
 end
 
 cutoff(J::TransformedPolys) = J.ru
