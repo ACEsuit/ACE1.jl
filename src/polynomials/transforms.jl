@@ -408,8 +408,8 @@ transform(t::MultiTransform, r::Number, z::AtomicNumber, z0::AtomicNumber) =
 transform_d(t::MultiTransform, r::Number, z::AtomicNumber, z0::AtomicNumber) =
       transform_d(t.transforms[z2i(t.zlist, z), z2i(t.zlist, z0)], r)
 
-inv_transform(t::MultiTransform, x::Number, z::AtomicNumber, z0::AtomicNumber) =
-      inv_transform(t.transforms[z2i(t.zlist, z), z2i(t.zlist, z0)], r)
+inv_transform(t::MultiTransform, y::Number, z::AtomicNumber, z0::AtomicNumber) =
+      inv_transform(t.transforms[z2i(t.zlist, z), z2i(t.zlist, z0)], y)
 
 # # NOTE: This is a bit of a hack, I'm checking whether 
 # #       the transforms have been transformed to the domain [-1, 1]
