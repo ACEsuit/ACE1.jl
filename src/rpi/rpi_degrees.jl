@@ -149,7 +149,7 @@ struct SparsePSHDegreeM <: AbstractPSHDegree
 end
 
 
-degree(d::SparsePSHDegreeM, phi::PSH1pBasisFcn, z0::AtomicNumber) =
+degree(d::SparsePSHDegreeM, phi::PSH1pBasisFcn, z0 = nothing) =
       (    d.wNfun(1, phi.z, z0) * phi.n
          + d.wLfun(1, phi.z, z0) * phi.l )
 
