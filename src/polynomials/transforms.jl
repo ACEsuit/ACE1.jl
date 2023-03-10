@@ -214,33 +214,7 @@ function agnesi_transform(r0, p, q;
    @assert q > 0
    @assert q >= p      
    @assert a > 0 
-   fwdt = "r -> 1 / (1 + $a * (r/$r0)^$q / (1 + (r/$r0)^($(q - p))) ) "
-   if p == q 
-      invt = "x -> $r0 * ( 2/$a * (1/x - 1) )^(1/$p)"
-   elseif q == 2*p 
-      invt = "x -> (y = (1/x-1)/$a; r = $r0 * (y/2 + sqrt(y^2/4 + y))^(1/$p); r)"
-   else 
-      invt = "auto"
-   end
-   return AnalyticTransform(fwdt, invt)
-end
-
-function agnesi2_transform(r0, p, q;    
-   a = (-2 * q + p * (-2 + 4 * q)) / (p + p^2 + q + q^2) )
-@assert p > 0
-@assert q > 0
-@assert q >= p      
-@assert a > 0 
-# fwdt = "r -> 1 / (1 + $a * (r/$r0)^$q / (1 + (r/$r0)^($(q - p))) ) "
-# if p == q 
-#    invt = "x -> $r0 * ( 2/$a * (1/x - 1) )^(1/$p)"
-# elseif q == 2*p 
-#    invt = "x -> (y = (1/x-1)/$a; r = $r0 * (y/2 + sqrt(y^2/4 + y))^(1/$p); r)"
-# else 
-#    invt = "auto"
-# end
-# return AnalyticTransform(fwdt, invt)
-return Agnesi2Transform(r0, p, q, a, zero(r0))
+   return Agnesi2Transform(r0, p, q, a, zero(r0))
 end
 
 
@@ -259,7 +233,7 @@ write_dict(T::Agnesi2Transform) =
            "r0" => T.r0, "p" => T.p, "q" => T.q, "a" => T.a, "rin" => T.rin)
 
 Agnesi2Transform(D::Dict) = Agnesi2Transform(D["r0"], D["p"], D["q"], 
-                                             a=D["a"], rin=D["rin"])
+                                             D["a"], D["rin"])
 
 read_dict(::Val{:ACE1_Agnesi2Transform}, D::Dict) = Agnesi2Transform(D)
 

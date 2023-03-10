@@ -99,9 +99,6 @@ td_r0 = transform_d(trans, r0)
 println_slim(@test all(abs(td_r0) .>= abs.(td_rr)))
 println_slim(@test all(test_fio(trans)))
 
-trans2 = ACE1.Transforms.agnesi2_transform(r0, 3, 4)
-trans2.(rr) ≈ trans.(rr)
-
 
 ##
 
@@ -112,9 +109,6 @@ ACE1.Testing.test_transform(trans, [0.1, 5.0])
 println()
 println_slim(@test all(JuLIP.Testing.test_fio(trans)))
 
-trans2 = ACE1.Transforms.agnesi2_transform(r0, 3, 3)
-trans2.(rr) ≈ trans.(rr)
-
 ##
 
 @info("Testing Agnesi(2,4)")
@@ -123,9 +117,6 @@ trans = agnesi_transform(r0, 2, 4)
 ACE1.Testing.test_transform(trans, [0.1, 5.0])
 println()
 println_slim(@test all(JuLIP.Testing.test_fio(trans)))
-
-trans2 = ACE1.Transforms.agnesi2_transform(r0, 3, 3)
-trans2.(rr) ≈ trans.(rr)
 
 
 # ##
