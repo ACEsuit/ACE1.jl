@@ -278,6 +278,35 @@ function scaling(basis::RPIBasis, p; a2b = abs2,
    return fin.(wwrpi)
 end
 
+"""
+when changing the coupling coefficients, it can happen that some basis 
+functions become identically zero. This function removes those 
+and then creates a new basis object which is returned. 
+"""
+function remove_zeros(basis::RPIBasis)
+   A2Bmaps = ()
+   Bz0inds = () 
+   need_new_basis = false
+   idx = 0 
+
+   for iz0 = 1:numz(basis)
+      CC = basis.A2Bmaps[iz0]
+      Inz = findall(!iszero, sum(abs, CC, dims=2)[:])
+      if length(Inz) < size(CC, 1)
+         need_new_basis = true
+      end
+      len = length(Inz)
+      A2Bmaps = (A2Bmaps..., CC[Inz, :])
+      Bz0inds = (Bz0inds..., idx+1:idx+len)
+      idx += len
+   end
+
+   if need_new_basis
+      return RPIBasis(basis.pibasis, A2Bmaps, Bz0inds)
+   else
+      return basis
+   end
+end
 
 # ------------------------------------------------------------------------
 #    Evaluation code
