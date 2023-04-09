@@ -364,7 +364,14 @@ function evaluate_d!(dEs, tmpd, V::PIPotential{T}, ::DAGEvaluator, Rs, Zs, z0) w
    # evaluate the 1-particle basis
    # this puts the first `dag.num1` 1-b (trivial) correlations into the
    # storage array, and from these we can build the rest
-   evaluate!(AA, tmpd_basis1p, basis1p, Rs, Zs, z0)
+   A = tmpd.A 
+   evaluate!(A, tmpd_basis1p, basis1p, Rs, Zs, z0)
+   @assert length(A) >= dag.num1
+   @inbounds for i = 1:dag.num1
+      AA[i] = A[i]
+   end
+
+   # evaluate!(AA, tmpd_basis1p, basis1p, Rs, Zs, z0)
 
    # Stage 2 of evaluate!
    # go through the dag and store the intermediate results we need
@@ -401,7 +408,7 @@ function evaluate_d!(dEs, tmpd, V::PIPotential{T}, ::DAGEvaluator, Rs, Zs, z0) w
       evaluate_d!(A, dA, tmpd_basis1p, basis1p, R, Z, z0)
       iz = z2i(basis1p, Z)
       inds = basis1p.Aindices[iz, iz0]
-      for iA = 1:length(basis1p, iz, iz0)
+      for iA = 1:dag.num1 # length(basis1p, iz, iz0)
          dEs[iR] += real(B[inds[iA]] * dA[inds[iA]])
       end
    end
