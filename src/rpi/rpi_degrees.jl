@@ -38,7 +38,7 @@ write_dict(b::PSH1pBasisFcn) =
 read_dict(::Val{:ACE1_PSH1pBasisFcn}, D::Dict) =
    PSH1pBasisFcn(D["nlmz"]...)
 
-scaling(b::PSH1pBasisFcn, p) = b.n^p + b.l^p + abs(b.m)^p
+scaling(b::PSH1pBasisFcn, p, wL=1.0) = b.n^p + wL * (b.l^p + abs(b.m)^p)
 
 abstract type AbstractPSHDegree <: AbstractDegree end
 

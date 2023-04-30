@@ -55,14 +55,14 @@ interface functions for `OneParticleBasis`
 function add_into_A_dA! end
 
 """
-`function scaling(b, p)`:
+`function scaling(b, p, wL=1.0)`:
 
 a scaling factor for a basis functions ϕ, which gives a rought estimate on
    the magnitude of ∇ᵖϕ e.g.,
 ```
 ϕ = r^n Ylm
 ```
-has scaling factor `n^p + l^p`, though sharper estimates are also possible.
+has scaling factor `n^p +  wL * l^p`, though sharper estimates are also possible.
 """
 function scaling end
 

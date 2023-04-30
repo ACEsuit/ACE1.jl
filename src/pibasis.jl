@@ -36,7 +36,7 @@ order(b::PIBasisFcn{N}) where {N} = N
 degree(d::AbstractDegree, pphi::PIBasisFcn) = degree(d, pphi.oneps)
 
 # TODO: this is very rough - can we do better?
-scaling(b::PIBasisFcn, p) = sum(scaling(bb, p) for bb in b.oneps)
+scaling(b::PIBasisFcn, p, wL=1.0) = sum(scaling(bb, p, wL) for bb in b.oneps)
 
 # TODO: can we replace this with get_basis_spec?
 function PIBasisFcn(Aspec, t, z0::AtomicNumber)
@@ -299,13 +299,13 @@ function _get_ordered(b2iA::Dict, pib::PIBasisFcn{N}) where {N}
 end
 
 
-function scaling(pibasis::PIBasis, p)
+function scaling(pibasis::PIBasis, p, wL=1.0)
    ww = zeros(Float64, length(pibasis))
    for iz0 = 1:numz(pibasis)
       wwin = @view ww[pibasis.inner[iz0].AAindices]
       for i = 1:length(pibasis.inner[iz0])
          bspec = get_basis_spec(pibasis, iz0, i)
-         wwin[i] = scaling(bspec, p)
+         wwin[i] = scaling(bspec, p, wL)
       end
    end
    return ww

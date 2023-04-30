@@ -267,9 +267,9 @@ but behaves a bit differently especially for high body-orders.
 The `fin` keyword argument is the "finishing" map. E.g. if we take `a2b = abs2`,
 then we should apply a sqrt at the end. This is done automatically here.
 """
-function scaling(basis::RPIBasis, p; a2b = abs2,
+function scaling(basis::RPIBasis, p, wL = 1.0; a2b = abs2,
                  fin = (a2b == abs2 ? sqrt : identity) )
-   wwpi = scaling(basis.pibasis, p)
+   wwpi = scaling(basis.pibasis, p, wL)
    wwrpi = zeros(Float64, length(basis))
    for iz0 = 1:numz(basis)
       wwpi_iz0 = wwpi[basis.pibasis.inner[iz0].AAindices]
