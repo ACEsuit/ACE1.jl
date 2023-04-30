@@ -117,9 +117,11 @@ maxorder(basis::InnerPIBasis) = size(basis.iAA2iA, 2)
 Base.length(basis::InnerPIBasis) = length(basis.orders)
 
 function _check_A_subset_AA(iAA2iA, lenA)
-   if maximum(iAA2iA) < lenA
-      @error("A has entries that don't appear in AA. This will likely lead to bugs.")
-   end
+   # TODO: This is not a bug but it should still not happen. Should issue a
+   # warning? 
+   # if maximum(iAA2iA) < lenA
+   #    @error("A has entries that don't appear in AA. This will likely lead to bugs.")
+   # end
    if maximum(iAA2iA) > lenA
       @error("AA contains references to indices in A > length(A).")
    end
