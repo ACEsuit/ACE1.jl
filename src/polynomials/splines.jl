@@ -1,10 +1,10 @@
 
 module Splines 
 
-
+import JuLIP: z2i, AtomicNumber 
 import Interpolations, ACE1, ForwardDiff
 
-using Interpolations: cubic_spline_interpolation
+using Interpolations: cubic_spline_interpolation, Flat, OnGrid
 
 using JuLIP.Potentials: z2i, i2z, SZList
 import JuLIP.Potentials: cutoff 
@@ -25,37 +25,109 @@ end
 
 Base.length(basis::RadialSplines) = size(basis.splines, 1)
 
-cutoff(basis::RadialSplines) = maximum(rg[3] for rg in basis.ranges)
+cutoff(basis::RadialSplines) = maximum(rg[2] for rg in basis.ranges)
+
+cutoff(basis::RadialSplines, z::AtomicNumber, z0::AtomicNumber) = 
+         maximum( rg[2] for rg in basis.ranges[:, z2i(basis.zlist, z), z2i(basis.zlist, z0)] )
 
 # --------------------- Setup codes
 
 # assuming that J has a multi-transform, but if not then the 
 # zlist can be passed in. 
 
-function RadialSplines(J; nnodes = 1_000, zlist = J.trans.zlist)
-   rcut = cutoff(J) 
-   dx = rcut/nnodes 
-   rcut += 4*dx 
-   rg_params = (0.0, rcut, nnodes)
-   rr = range(0.0, stop=rcut, length=nnodes)
+function RadialSplines(J; nnodes = 1_000, zlist = J.trans.zlist, 
+                          mode = :bspline)
+   if mode == :hermite 
+      return RadialSplines_hermite(J, nnodes=nnodes, zlist=zlist) 
+   elseif mode == :bspline 
+      return RadialSplines_bspline(J, nnodes=nnodes, zlist=zlist) 
+   else 
+      error("Unknown mode: $mode")
+   end
+end 
+
+function RadialSplines_hermite(J; nnodes = 1_000, zlist = J.trans.zlist)
+   @warn("Hermite splines uses an un-documented feature of Interpolations.jl. This means that it can break at any time.")
    NZ = length(zlist)
    NB = length(J)
+   rcut = cutoff(J)
+   rg_params = (0.0, rcut, nnodes)
+   rr = range(0.0, stop=rcut, length=nnodes)
    splines = Array{Any}(undef, NB, NZ, NZ)
+
    for iz = 1:NZ, iz0 = 1:NZ
       z = i2z(zlist, iz)
       z0 = i2z(zlist, iz0)
+   
       J_zz0 = zeros(NB, nnodes)
+      dJ_zz0 = zeros(NB, nnodes)
       for (ir, r) in enumerate(rr) 
          J_zz0[:, ir] = evaluate(J, r, z, z0)
+         dJ_zz0[:, ir] = ACE1.evaluate_d(J, r, z, z0)
       end
       for ib = 1:NB 
-         splines[ib, iz, iz0] = cubic_spline_interpolation(rr, J_zz0[ib, :])
+         splines[ib, iz, iz0] = Interpolations.CubicHermite(rr, J_zz0[ib, :], dJ_zz0[ib, :])
       end
    end
 
    splines_ = identity.(splines)
    range_params = fill(rg_params, size(splines))
    return RadialSplines(splines_, zlist, range_params)
+end
+
+function cutoff(J::ACE1.OrthPolys.TransformedPolys, z::AtomicNumber, z0::AtomicNumber)
+   if !(J.trans isa ACE1.Transforms.MultiTransform)
+      return cutoff(J) 
+   end 
+
+   if !( (J.J.tl ≈ -1) && (J.J.tr ≈ 1) && 
+         all(trans isa ACE1.Transforms.AffineT 
+                   for trans in J.trans.transforms) )
+      error("""To use cubic B splines I must be able to infer the species-dependent rcuts.
+               I can't figure this out for the given basis. Try to use `mode = :hermite` instead.
+            """)
+   end
+
+   rcut = try
+      rr = ACE1.Transforms.inv_transform(J.trans, 1.0, z, z0)
+      rl = ACE1.Transforms.inv_transform(J.trans, -1.0, z, z0)
+      max(rr, rl)
+   catch 
+      error("""To use cubic B splines I need the inverse transform implemented. 
+      Try to use a different transform, or try to use hermite interpolation.""")
+   end
+
+   return rcut 
+end
+
+
+function RadialSplines_bspline(J; nnodes = 1_000, zlist = J.trans.zlist)
+   NZ = length(zlist)
+   NB = length(J)
+   splines = Array{Any}(undef, NB, NZ, NZ)
+   range_params = Array{Any}(undef, NB, NZ, NZ)
+
+   for iz = 1:NZ, iz0 = 1:NZ
+      z = i2z(zlist, iz)
+      z0 = i2z(zlist, iz0)
+
+      rcut = cutoff(J, z, z0)
+      range_params[:, iz, iz0] .= Ref((0.0, rcut, nnodes))
+      rr = range(0.0, stop=rcut, length=nnodes)
+   
+      J_zz0 = zeros(NB, nnodes)
+      for (ir, r) in enumerate(rr) 
+         J_zz0[:, ir] = evaluate(J, r, z, z0)
+      end
+      for ib = 1:NB 
+         splines[ib, iz, iz0] = cubic_spline_interpolation(rr, J_zz0[ib, :]; 
+                                                         bc = Flat(OnGrid()))
+      end
+   end
+
+   splines_ = identity.(splines)
+   range_params_ = identity.(range_params)
+   return RadialSplines(splines_, zlist, range_params_)
 end
 
 # --------------------- FIO 
@@ -132,7 +204,11 @@ function evaluate!(B, tmp, basis::RadialSplines, r, z, z0)
    # not a bottleneck
    for n = 1:len 
       spl = basis.splines[n, iz, iz0]
-      B[n] = spl(r)
+      if basis.ranges[n, iz, iz0][1] <= r <= basis.ranges[n, iz, iz0][2]
+         B[n] = spl(r)
+      else
+         B[n] = 0
+      end
    end
 
    return B
@@ -152,15 +228,22 @@ function evaluate_d!(B, dB, tmpd, basis::RadialSplines, r, z, z0)
    len = size(basis.splines, 1)
    # @assert length(B) >= len 
 
-   dr = ForwardDiff.Dual(r, 1)
+   # dr = ForwardDiff.Dual(r, 1)
 
    # inbounds here would redice cost by ca 10%, not worth it, this is 
    # not a bottleneck
    for n = 1:len 
       spl = basis.splines[n, iz, iz0]
-      d_spl = spl(dr)
-      B[n] = d_spl.value 
-      dB[n] = d_spl.partials[1]
+      if basis.ranges[n, iz, iz0][1] <= r <= basis.ranges[n, iz, iz0][2]
+         # d_spl = spl(dr)
+         # B[n] = d_spl.value 
+         # dB[n] = d_spl.partials[1]
+         B[n] = spl(r)
+         dB[n] = Interpolations.gradient(spl, r)
+      else
+         B[n] = 0
+         dB[n] = 0
+      end
    end
 
    return dB

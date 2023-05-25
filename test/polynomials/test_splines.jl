@@ -34,7 +34,26 @@ maxdeg = 8
 N = 3
 Pr = transformed_jacobi(maxdeg, mtrans; pcut = 2)
 
-Sr = ACE1.Splines.RadialSplines(Pr; nnodes=4_000)
+Sr = ACE1.Splines.RadialSplines(Pr; nnodes=4_000, mode=:bspline)
+
+# as backupu we can also try this: 
+# Sr = ACE1.Splines.RadialSplines(Pr; nnodes=4_000, mode=:hermite)
+
+##
+
+# maxdeg = 25
+# Pr = transformed_jacobi(maxdeg, mtrans; pcut = 2)
+# Sr = ACE1.Splines.RadialSplines(Pr; nnodes=4_000, mode=:bspline)
+# zFe = AtomicNumber(:Fe)
+# zC = AtomicNumber(:C)
+# ACE1.evaluate(Pr, 5.0, zFe, zC)
+
+
+# for n = 1:maxdeg 
+#    rr = range(5.0, 5.01, length=1_000) 
+#    yy = [ ACE1.evaluate(Pr, r, zFe, zC)[n] for r in rr ]
+#    @show extrema(yy)
+# end
 
 ##
 
@@ -62,8 +81,8 @@ for ntest = 1:100
    dp = evaluate_d(Pr, r, z, z0)
    ds = evaluate_d(Sr, r, z, z0)
 
-   npass += norm(p - s, Inf) < 1e-9
-   d_npass += norm(dp - ds, Inf) < 1e-5
+   npass += norm(p - s, Inf) < 1e-10
+   d_npass += norm(dp - ds, Inf) < 1e-7
 end
 print("  npass = $npass / 100: "); println_slim(@test npass > 95)
 print("d_npass = $d_npass / 100: "); println_slim(@test d_npass > 95)
@@ -113,8 +132,8 @@ for ntest = 1:100
    dB_P = evaluate_d(rpibasis_P, Rs, Zs, z0)
    dB_S = evaluate_d(rpibasis_S, Rs, Zs, z0)
 
-   npass += (norm(B_P - B_S, Inf) / Nat < 1e-7)
-   d_npass += (norm(dB_P - dB_S, Inf) / Nat < 1e-4)
+   npass += (norm(B_P - B_S, Inf) / Nat < 1e-8)
+   d_npass += (norm(dB_P - dB_S, Inf) / Nat < 1e-5)
 end
 
 print("  npass = $npass / 100: "); println_slim(@test npass > 95)
