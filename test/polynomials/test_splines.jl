@@ -41,19 +41,16 @@ Sr = ACE1.Splines.RadialSplines(Pr; nnodes=4_000, mode=:bspline)
 
 ##
 
-# maxdeg = 25
-# Pr = transformed_jacobi(maxdeg, mtrans; pcut = 2)
-# Sr = ACE1.Splines.RadialSplines(Pr; nnodes=4_000, mode=:bspline)
-# zFe = AtomicNumber(:Fe)
-# zC = AtomicNumber(:C)
-# ACE1.evaluate(Pr, 5.0, zFe, zC)
+maxdeg1 = 25
+Pr1 = transformed_jacobi(maxdeg1, mtrans; pcut = 2)
+Sr1 = ACE1.Splines.RadialSplines(Pr1; nnodes=4_000, mode=:bspline)
+zFe = AtomicNumber(:Fe)
+zC = AtomicNumber(:C)
 
+rr = range(5.0, 5.01, length=1_000) 
 
-# for n = 1:maxdeg 
-#    rr = range(5.0, 5.01, length=1_000) 
-#    yy = [ ACE1.evaluate(Pr, r, zFe, zC)[n] for r in rr ]
-#    @show extrema(yy)
-# end
+@info("check that splines are truly zero outside cutoff")
+println_slim(@test all(iszero, [ norm(ACE1.evaluate(Pr, r, zFe, zC)) for r in rr ]))
 
 ##
 
