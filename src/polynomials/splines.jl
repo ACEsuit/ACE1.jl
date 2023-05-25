@@ -137,6 +137,8 @@ function export_splines(basis::RadialSplines)
    _get_vals(spl, rg) = spl.(rg)
    ranges = _get_rg.(basis.ranges) 
    nodalvals = _get_vals.(basis.splines, ranges)
+   # quick check that the splines we are exporting are not Hermite splines
+   @assert eltype(basis.splines) <: Interpolations.Extrapolation
    return ranges, nodalvals, basis.zlist.list 
 end
 
@@ -167,7 +169,9 @@ function read_dict(::Val{:ACE1_RadialSplines}, D::Dict)
    ranges = [ range(T(p[1]), stop=T(p[2]), length=Int(p[3])) 
                for p in range_params ]
    spl_vals = [ T.(v) for v in D["nodal_values"] ]
-   splines = [ cubic_spline_interpolation(rg, vals) for (rg, vals) in zip(ranges, spl_vals) ]
+   
+   splines = [ cubic_spline_interpolation(rg, vals; bc = Flat(OnGrid())) 
+               for (rg, vals) in zip(ranges, spl_vals) ]
    splines_ = collect( reshape(splines, D["size"]...) )
    range_params = collect(reshape([ tuple(T(p[1]), T(p[2]), Int(p[3])) for p in range_params ], D["size"]...))
    return RadialSplines(splines_, zlist, range_params)
@@ -239,7 +243,7 @@ function evaluate_d!(B, dB, tmpd, basis::RadialSplines, r, z, z0)
          # B[n] = d_spl.value 
          # dB[n] = d_spl.partials[1]
          B[n] = spl(r)
-         dB[n] = Interpolations.gradient(spl, r)
+         dB[n] = Interpolations.gradient(spl, r)[1]
       else
          B[n] = 0
          dB[n] = 0
