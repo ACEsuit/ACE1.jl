@@ -51,6 +51,7 @@ include("pairpots/pair.jl");
 
 include("committee.jl")
 include("descriptors.jl")
+include("cleanup.jl")
 
 
 # lots of stuff related to random samples:
