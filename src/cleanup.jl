@@ -152,12 +152,12 @@ function _cleanup(pibasis::PIBasis, IInz, IIz)
    end 
 
    ## STAGE 4: rebuild the evaluation graphs 
-   # for iz0 = 1:NZ
-   #    inner = pibasis_new.inner[iz0]
-   #    ACE1.generate_dag!(inner)
-   # end
+   for iz0 = 1:NZ
+      inner = pibasis_new.inner[iz0]
+      ACE1.generate_dag!(inner)
+   end
 
-   return standardevaluator(pibasis_new )
+   return pibasis_new
 end
 
 
