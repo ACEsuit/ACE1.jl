@@ -40,6 +40,7 @@ include("grapheval.jl")
 # for other bases but can also be a useful export itself
 include("pibasis.jl")
 include("pipot.jl")
+include("compress_pipot.jl")
 
 # rotation-invariant site potentials (incl the ACE model)
 include("rpi/rpi.jl")
