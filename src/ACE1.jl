@@ -40,7 +40,6 @@ include("grapheval.jl")
 # for other bases but can also be a useful export itself
 include("pibasis.jl")
 include("pipot.jl")
-include("compress_pipot.jl")
 
 # rotation-invariant site potentials (incl the ACE model)
 include("rpi/rpi.jl")
@@ -52,6 +51,7 @@ include("pairpots/pair.jl");
 
 include("committee.jl")
 include("descriptors.jl")
+include("cleanup.jl")
 
 
 # lots of stuff related to random samples:
