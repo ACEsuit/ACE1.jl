@@ -8,9 +8,11 @@
 
 [![Codecov](https://codecov.io/gh/JuliaMolSim/ACE.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/JuliaMolSim/ACE.jl) -->
 
+**WARNING:** This package now acts mostly as a (to be retired) backend to other packages. If you have come to this repository to fit interatomic potentials, then please go to the user-facing companion package [`ACE1pack.jl`](https://github.com/ACEsuit/ACE1pack.jl) which also provides documentation and tutorials on the usage of `ACE1.jl`.
+
+
 This package implements a flavour of the *Atomic Cluster Expansion*; i.e., parameterisation schemes for permutation and isometry invariant functions, primarily for the purpose of modelling invariant atomic properties. It provides constructions of symmetric polynomial bases, imposing permutation and isometry invariance. 
 
-Most users should use the user-facing companian package [`ACE1pack.jl`](https://github.com/ACEsuit/ACE1pack.jl) which also provides documentation and tutorials on the usage of `ACE1.jl`.
 
 
 ## References
