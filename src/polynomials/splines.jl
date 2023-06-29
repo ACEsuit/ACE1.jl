@@ -182,6 +182,7 @@ end
 
 alloc_B(basis::RadialSplines{T}, args...) where {T} = zeros(T, length(basis))
 
+alloc_dB(basis::RadialSplines{T}, args...) where {T} = zeros(T, length(basis))
 alloc_dB(basis::RadialSplines{T}, ::Number) where {T} = zeros(T, length(basis))
 alloc_dB(basis::RadialSplines{T}, ::Int64) where {T} = zeros(T, length(basis))
 
