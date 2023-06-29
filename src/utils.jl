@@ -8,6 +8,7 @@
 
 module Utils
 
+import ACE1
 import ACE1.RPI: BasicPSH1pBasis, SparsePSHDegree, RPIBasis, get_maxn, 
                  SparsePSHDegreeM
 import ACE1: PolyTransform, transformed_jacobi
@@ -17,7 +18,7 @@ import ACE1.PairPotentials: PolyPairBasis
 # - construct a descriptor
 # - simple wrappers to generate RPI basis functions (ACE + relatives)
 
-export rpi_basis, descriptor, pair_basis, ace_basis
+export rpi_basis, descriptor, pair_basis, ace_basis, splinify 
 
 
 """
@@ -104,6 +105,19 @@ function pair_basis(; species = :X,
 end
 
 
+# --------------------- Splinify an RPI basis 
+
+
+function splinify(basis::RPIBasis)
+   basis1p = deepcopy(basis.pibasis.basis1p)
+   J_spl = ACE1.Splines.RadialSplines(basis1p.J; zlist = basis1p.zlist)
+   basis1p_spl = ACE1.RPI.BasicPSH1pBasis(J_spl, deepcopy(basis1p.SH), 
+                  deepcopy(basis1p.zlist), deepcopy(basis1p.spec), deepcopy(basis1p.Aindices) )
+   pibasis_spl = ACE1.PIBasis(basis1p_spl, deepcopy(basis1p.zlist), 
+               deepcopy(basis.pibasis.inner), deepcopy(basis.pibasis.evaluator))
+   basis_spl = RPIBasis(pibasis_spl, deepcopy(basis.A2Bmaps), deepcopy(basis.Bz0inds) )   
+   return basis_spl
+end
 
 
 end

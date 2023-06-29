@@ -136,3 +136,53 @@ end
 print("  npass = $npass / 100: "); println_slim(@test npass > 95)
 print("d_npass = $d_npass / 100: "); println_slim(@test d_npass > 95)
 
+
+##
+
+@info("Testing `splinify`")
+
+import ACE1.Splines: splinify 
+basis_spl = splinify(rpibasis_P)
+
+
+@info("Test splinify basis")
+for ntest = 1:20 
+   Nat = 12 
+   Rs = [ (2.7 + rand() * 3) * ACE1.Random.rand_sphere() for _ = 1:Nat ]
+   Zs = rand([zFe, zC, zAl], Nat)
+   z0 = rand([zFe, zC, zAl])
+   
+   B_P = evaluate(rpibasis_P, Rs, Zs, z0)
+   B_spl = evaluate(basis_spl, Rs, Zs, z0)
+   dB_P = evaluate_d(rpibasis_P, Rs, Zs, z0)
+   dB_spl = evaluate_d(basis_spl, Rs, Zs, z0)
+   
+   print_tf((@test norm(B_P - B_spl) < 1e-3))
+   print_tf((@test maximum(norm, dB_P - dB_spl) < 1e-3))
+end 
+
+## 
+
+Nbas = length(rpibasis_P)
+cc = randn(Nbas) ./ (1:Nbas).^2
+V_P = JuLIP.MLIPs.combine(rpibasis_P, cc)
+V_spl = JuLIP.MLIPs.combine(basis_spl, cc)
+
+@info("test splinify potential")
+for ntest = 1:20 
+   Nat = 12 
+   Rs = [ (2.7 + rand() * 3) * ACE1.Random.rand_sphere() for _ = 1:Nat ]
+   Zs = rand([zFe, zC, zAl], Nat)
+   z0 = rand([zFe, zC, zAl])
+
+   v_P = evaluate(V_P, Rs, Zs, z0)
+   v_spl = evaluate(V_spl, Rs, Zs, z0)
+   
+   print_tf(@test abs(v_P - v_spl) < 1e-10 )
+
+   dv_P = evaluate_d(V_P, Rs, Zs, z0)
+   dv_spl = evaluate_d(V_spl, Rs, Zs, z0)
+   print_tf(@test maximum(norm, dv_P - dv_spl) < 1e-7)
+end 
+
+
