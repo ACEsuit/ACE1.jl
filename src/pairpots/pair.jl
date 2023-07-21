@@ -17,7 +17,7 @@ using JuLIP.Potentials: ZList, SZList, @pot, @D,
                         PairPotential, SimplePairPotential
 using StaticArrays: SMatrix
 
-using ACE1: ScalarBasis, _allfieldsequal
+using ACE1: ScalarBasis, allfieldsequal
 
 import JuLIP: evaluate!, evaluate_d!, cutoff,
               evaluate, evaluate_d,

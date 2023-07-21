@@ -12,7 +12,7 @@ module Transforms
 import Base:   ==
 import JuLIP:  cutoff, AtomicNumber
 import JuLIP.FIO: read_dict, write_dict
-import ACE1: _allfieldsequal
+import ACE1: allfieldsequal
 
 abstract type DistanceTransform end
 
@@ -357,7 +357,7 @@ transform(t::AffineT, r) = t.y1 + (transform(t.t, r) - t.x1) * (t.y2-t.y1)/(t.x2
 transform_d(t::AffineT, r) = ((t.y2-t.y1)/(t.x2-t.x1)) * transform_d(t.t, r)
 inv_transform(t::AffineT, y) = inv_transform(t.t, t.x1 + (y - t.y1) * (t.x2-t.x1)/(t.y2-t.y1))
 
-==(t1::AffineT, t2::AffineT) = _allfieldsequal(t1, t2) 
+==(t1::AffineT, t2::AffineT) = allfieldsequal(t1, t2) 
 
 write_dict(T::AffineT) = 
       Dict("__id__" => "ACE1_AffineT", 
@@ -386,7 +386,7 @@ cutoff_extrema(T::MultiTransform) =
 
 # FIO 
 
-==(T1::MultiTransform, T2::MultiTransform) =  _allfieldsequal(T1, T2)
+==(T1::MultiTransform, T2::MultiTransform) =  allfieldsequal(T1, T2)
 
 write_dict(T::MultiTransform) =
       Dict("__id__" => "ACE1_MultiTransform", 

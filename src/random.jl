@@ -97,7 +97,12 @@ rand_sym(Rs, Zs) = rand_refl(rand_rot(rand_perm(Rs, Zs)...)...)
 
 function randcoeffs(basis; diff = 2)
    ww = scaling(basis, diff)
-   c = 2 * (rand(rfltype(basis), length(basis)) .- 0.5) ./ ww
+   T = try 
+      rfltype(basis)
+   catch 
+      Float64
+   end
+   c = 2 * (rand(T, length(basis)) .- 0.5) ./ ww
    return c / norm(c)
 end
 

@@ -25,7 +25,7 @@ end
 
 length(dag::CorrEvalGraph) = length(dag.nodes)
 
-==(dag1::CorrEvalGraph, dag2::CorrEvalGraph) = ACE1._allfieldsequal(dag1, dag2)
+==(dag1::CorrEvalGraph, dag2::CorrEvalGraph) = ACE1.allfieldsequal(dag1, dag2)
 
 CorrEvalGraph{T, TI}() where {T, TI} =
       CorrEvalGraph(Vector{BinDagNode{TI}}(undef, 0),

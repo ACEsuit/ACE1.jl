@@ -222,7 +222,7 @@ end
 
 cutoff(basis::PIBasis) = cutoff(basis.basis1p)
 
-==(B1::PIBasis, B2::PIBasis) = ACE1._allfieldsequal(B1, B2)
+==(B1::PIBasis, B2::PIBasis) = ACE1.allfieldsequal(B1, B2)
 
 fltype(basis::PIBasis) = fltype(basis.basis1p)
 

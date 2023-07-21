@@ -41,4 +41,6 @@ import JuLIP.MLIPs: IPBasis, alloc_B, alloc_dB, combine
 
 import JuLIP.Potentials: ZList, SZList, zlist
 
-import ACEbase: fltype, rfltype, _allfieldsequal
+import JuLIP: fltype, rfltype
+
+import ACEbase: allfieldsequal

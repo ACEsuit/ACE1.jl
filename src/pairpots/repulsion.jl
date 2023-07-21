@@ -41,7 +41,7 @@ write_dict(V::BuckPot) = Dict(
 read_dict(::Val{:ACE1_BuckPot}, D::Dict) =
       BuckPot(D["e0"], D["A"], D["ri"], D["B"])
 
-==(V1::BuckPot, V2::BuckPot) = _allfieldsequal(V1, V2)
+==(V1::BuckPot, V2::BuckPot) = allfieldsequal(V1, V2)
 
 
 # ----------------------------------------------------------------------
@@ -54,7 +54,7 @@ end
 
 @pot RepulsiveCore
 
-==(V1::RepulsiveCore, V2::RepulsiveCore) = _allfieldsequal(V1, V2)
+==(V1::RepulsiveCore, V2::RepulsiveCore) = allfieldsequal(V1, V2)
 
 cutoff(V::RepulsiveCore) = cutoff(V.Vout)
 

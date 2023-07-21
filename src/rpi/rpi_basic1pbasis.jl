@@ -123,7 +123,7 @@ _build_PSH_1p_spec(maxn::Integer, D::AbstractDegree, species::Symbol) =
 #  FIO code
 
 
-==(P1::BasicPSH1pBasis, P2::BasicPSH1pBasis) =  ACE1._allfieldsequal(P1, P2)
+==(P1::BasicPSH1pBasis, P2::BasicPSH1pBasis) =  ACE1.allfieldsequal(P1, P2)
 
 write_dict(basis::BasicPSH1pBasis{T}) where {T} = Dict(
       "__id__" => "ACE1_BasicPSH1pBasis",
