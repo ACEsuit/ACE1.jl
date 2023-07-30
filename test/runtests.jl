@@ -19,6 +19,7 @@ JuLIP.usethreads!(false)
     @testset "Ylm" begin include("polynomials/test_ylm.jl") end 
     @testset "Real  Ylm" begin include("polynomials/test_rylm.jl") end 
     @testset "Transforms" begin include("polynomials/test_transforms.jl") end 
+    @testset "NormalTransforms" begin include("polynomials/test_normaltrans.jl") end
     @testset "OrthogonalPolynomials" begin include("polynomials/test_orthpolys.jl") end 
     @testset "Splines" begin include("polynomials/test_splines.jl") end 
 

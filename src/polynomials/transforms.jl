@@ -265,7 +265,10 @@ function inv_transform(t::Agnesi2Transform, x::Number)
    return t.rin + s * (t.r0 - t.rin)
 end
 
+# ---------- Normalized Transform 
+# this also makes agnesi invertible 
 
+include("normaltrans.jl")
 
 
 # --------- AnalyticTransform 

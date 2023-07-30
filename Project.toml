@@ -1,7 +1,6 @@
 name = "ACE1"
 uuid = "e3f9bc04-086e-409a-ba78-e9769fe067bb"
-version = "v0.11.13"
-
+version = "0.11.13"
 
 [deps]
 ACEbase = "14bae519-eb20-449c-a949-9c58ed33163e"
@@ -19,6 +18,7 @@ Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 QuadGK = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
@@ -26,11 +26,12 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 [compat]
 Combinatorics = "1"
 ForwardDiff = "0.10"
+Interpolations = "0.14"
 JuLIP = "0.14"
 NeighbourLists = "0.5.1 - 0"
 StaticArrays = "1.5"
 julia = "1.7"
-Interpolations = "0.14"
+Roots = "2"
 
 [extras]
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
