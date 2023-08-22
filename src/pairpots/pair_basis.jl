@@ -159,3 +159,22 @@ function virial(pB::PolyPairBasis, at::Atoms{T}) where {T}
    end
    return V
 end
+
+
+# ----------- 
+# an implementation needed to use pair potentials as site-based descriptors 
+
+function evaluate!(Ei::Vector{Float64}, tmp, basis::PolyPairBasis, Rs, Zs, z0)
+   for (rr, z) in zip(Rs, Zs)
+      r = norm(rr) 
+      Ii = z2i(basis, z0)
+      Ij = z2i(basis, z)
+      J = tmp.J[Ii, Ij]
+      evaluate!(J, tmp.tmp_J[Ii, Ij], basis.J[Ii, Ij], r, z, z0)
+      idx0 = _Bidx0(basis, z, z0)
+      for n = 1:length(basis.J[Ii, Ij])
+         Ei[idx0 + n] += 0.5 * J[n]
+      end
+   end
+   return Ei 
+end
