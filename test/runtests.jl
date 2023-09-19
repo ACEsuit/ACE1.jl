@@ -50,4 +50,5 @@ JuLIP.usethreads!(false)
     @testset "Pair-Committee" begin include("test_committee_pair.jl") end 
     @testset "Any"  begin include("test_any.jl") end 
     @testset "Multi-Transform" begin include("polynomials/test_multitrans.jl") end 
+    @testset "Site Energy" begin include("test_siteenergy.jl") end 
 end

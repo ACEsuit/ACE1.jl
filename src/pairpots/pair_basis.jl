@@ -170,11 +170,28 @@ function evaluate!(Ei::Vector{Float64}, tmp, basis::PolyPairBasis, Rs, Zs, z0)
       Ii = z2i(basis, z0)
       Ij = z2i(basis, z)
       J = tmp.J[Ii, Ij]
-      evaluate!(J, tmp.tmp_J[Ii, Ij], basis.J[Ii, Ij], r, z, z0)
-      idx0 = _Bidx0(basis, z, z0)
+      evaluate!(J, tmp.tmp_J[Ii, Ij], basis.J[Ii, Ij], r, z0, z)
+      idx0 = _Bidx0(basis, z0, z)
       for n = 1:length(basis.J[Ii, Ij])
          Ei[idx0 + n] += 0.5 * J[n]
       end
    end
    return Ei 
+end
+
+
+function evaluate_d!(dB::Matrix{<: JVec}, tmp, basis::PolyPairBasis, Rs, Zs, z0)
+   fill!(dB, zero(eltype(dB)))
+   for (j, (rr, z)) in enumerate(zip(Rs, Zs))
+      r = norm(rr) 
+      Ii = z2i(basis, z0)
+      Ij = z2i(basis, z)
+      dJ = tmp.dJ[Ii, Ij]
+      evaluate_d!(tmp.J[Ii, Ij], dJ, tmp.tmpd_J[Ii, Ij], basis.J[Ii, Ij], r, z0, z)
+      idx0 = _Bidx0(basis, z0, z)
+      for n = 1:length(dJ)
+         dB[idx0 + n, j] += 0.5 * dJ[n] * (rr/r)  # += 0.5 * J[n]
+      end
+   end
+   return dB  
 end
