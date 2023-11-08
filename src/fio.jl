@@ -1,6 +1,7 @@
 
-
-export load_potential, save_potential
+# no longer export these so that we can provide new functionality from 
+# ACEpotentials
+# export load_potential, save_potential
 
 function _auto_format(fname)
    if fname[end-3:end] == "json"
