@@ -10,7 +10,7 @@
 
 --- 
 
-**WARNING:** This package now acts mostly as a (to be retired) backend to other packages. If you have come to this repository to fit interatomic potentials, then please go to the user-facing companion package [`ACE1pack.jl`](https://github.com/ACEsuit/ACE1pack.jl) which also provides documentation and tutorials on the usage of `ACE1.jl`.
+**WARNING:** This package now acts mostly as a (to be retired) backend to other packages. If you have come to this repository to fit interatomic potentials, then please go to the user-facing companion package [`ACEpotentials.jl`](https://github.com/ACEsuit/ACEpotentials.jl) which also provides documentation and tutorials on the usage of `ACE1.jl`.
 
 ---
 
