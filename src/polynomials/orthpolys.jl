@@ -413,6 +413,7 @@ end
 
 function evaluate(env::PolyEnvelope, r::T) where {T <: Real}
    p, r0, rcut = env.p, env.r0, env.rcut
+   if r > rcut; return 0.0; end
    s = r/r0; scut = rcut/r0 
    return s^(-p) - scut^(-p) + p * scut^(-p-1) * (s - scut)
 end
